@@ -1,0 +1,8 @@
+.wl-card .wl-meta>span {
+	background: rgba(170, 170, 170, .5);
+	color: rgb(240, 240, 240);
+}
+
+[data-waline] p {
+	color: rgb(240, 240, 240);
+}
