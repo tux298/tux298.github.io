@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>背包数据分析2 | x86devLog</title>
+  
+  <!-- Favicon 配置 -->
+  
+    
+      <link rel="icon" type="image/x-icon" href="../../../../favicon.ico">
+    
+    
+      <link rel="icon" type="image/png" sizes="16x16" href="../../../../favicon-16x16.png">
+    
+    
+      <link rel="icon" type="image/png" sizes="32x32" href="../../../../favicon-32x32.png">
+    
+    
+      <link rel="icon" type="image/png" sizes="192x192" href="../../../../favicon-192x192.png">
+    
+    
+      <link rel="apple-touch-icon" sizes="180x180" href="../../../../apple-touch-icon.png">
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../../../../css/theme-colors.css">
+  <link rel="stylesheet" href="../../../../css/main.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <!-- 添加代码高亮样式 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+  <!-- 添加highlight.js库 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  <!-- 添加mermaid.js库 -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <link rel="stylesheet" href="../../../../css/code.css">
+  <link rel="stylesheet" href="../../../../css/code-custom.css">
+  <link rel="stylesheet" href="../../../../css/code-languages.css">
+  <link rel="stylesheet" href="../../../../css/mermaid.css">
+
+  <link rel="stylesheet" href="../../../../css/vs-code.css">
+  <link rel="stylesheet" href="../../../../css/post.css?v=1767101536398">
+  <link rel="stylesheet" href="../../../../css/tag.css">
+  <link rel="stylesheet" href="../../../../css/categories.css">
+  <link rel="stylesheet" href="../../../../css/archive.css">
+  <link rel="stylesheet" href="../../../../css/search.css">
+  <link rel="stylesheet" href="../../../../css/mobile.css">  <link rel="stylesheet" href="../../../../css/responsive.css">
+  <link rel="stylesheet" href="../../../../css/elements.css">
+
+  <!-- 添加 JetBrains Mono 字体 -->  
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- Add any custom head content here -->
+
+  <script src="../../../../js/explorer.js"></script>
+  <script src="../../../../js/code-copy.js"></script>
+  <script src="../../../../js/code-enhance.js"></script>
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+  <body>
+    <div class="wrapper">
+      <div class="mobile-menu-toggle">
+        <i class="fas fa-bars"></i>
+      </div>
+      <header class="vs-header">
+  <nav class="vs-nav">
+    <div class="nav-left">
+      <a href="/" class="nav-brand">
+        <i class="fas fa-terminal"></i>
+        x86devLog
+      </a>
+    </div>
+    
+    <div class="nav-right">
+      <a href="/" class="nav-item ">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+      </a>
+      <a href="/archives/" class="nav-item ">
+        <i class="fas fa-archive"></i>
+        <span>Archives</span>
+      </a>
+      <a href="/categories/" class="nav-item ">
+        <i class="fas fa-folder"></i>
+        <span>Categories</span>
+      </a>
+      <a href="/tags/" class="nav-item ">
+        <i class="fas fa-tags"></i>
+        <span>Tags</span>
+      </a>
+      <a href="/search/" class="nav-item ">
+        <i class="fas fa-search"></i>
+        <span>Search</span>
+      </a>
+      <a href="/about/" class="nav-item ">
+        <i class="fas fa-info-circle"></i>
+        <span>About</span>
+      </a>
+    </div>
+  </nav>
+</header>
+
+<script>
+  function smoothScroll(event, target) {
+    event.preventDefault();
+    const targetId = target.substring(target.indexOf('#') + 1);
+    const targetElement = document.getElementById(targetId);
+
+    if (targetElement) {
+      window.scrollTo({
+        top: targetElement.offsetTop - 50, // 调整偏移量
+        behavior: 'smooth'
+      });
+    } else {
+      window.location.href = target;
+    }
+  }
+
+  window.addEventListener('scroll', function() {
+    const header = document.querySelector('.vs-header');
+    const nav = document.querySelector('.vs-nav');
+    const scrollPercent = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+    
+    nav.style.setProperty('--scroll-percent', `${scrollPercent}%`);
+    
+    if (window.scrollY > 0) {
+      header.classList.add('scrolled');
+    } else {
+      header.classList.remove('scrolled');
+    }
+  });
+
+  // 添加标签页切换动画
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', function(e) {
+      const ripple = document.createElement('span');
+      ripple.classList.add('nav-ripple');
+      this.appendChild(ripple);
+      
+      const rect = this.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      ripple.style.left = `${x}px`;
+      ripple.style.top = `${y}px`;
+      
+      setTimeout(() => ripple.remove(), 1000);
+    });
+  });
+</script>
+
+
+<div class="vscode-container">
+  <!-- 左侧资源管理器 -->
+  <div class="sidebar-explorer">
+    <!-- TOC导航 -->
+    <div class="explorer-section">
+      <div class="section-header">
+        <i class="fas fa-list"></i>
+        <span>TABLE OF CONTENTS</span>
+      </div>
+      <div class="section-content">
+        
+      </div>
+    </div>
+    
+    <!-- 同分类文章 -->
+    
+    <div class="explorer-section">
+      <div class="section-header">
+        <i class="fas fa-folder"></i>
+        <span>CATEGORY POSTS</span>
+      </div>
+      <div class="section-content">
+        
+          <div class="file">
+            <i class="fas fa-file-code"></i>
+            <a href="../../26/knapsack-object/">背包数据分析</a>
+          </div>
+        
+          <div class="file">
+            <i class="fas fa-file-code"></i>
+            <a href="../../26/Character-Object/">人物对象查找</a>
+          </div>
+        
+      </div>
+    </div>
+    
+    
+    <!-- 标签列表 -->
+    
+    <div class="explorer-section">
+      <div class="section-header">
+        <i class="fas fa-tags"></i>
+        <span>ARTICLE TAGS</span>
+      </div>
+      <div class="section-content">
+        
+          <div class="tag-item">
+            <i class="fas fa-tag"></i>
+            <a href="../../../../tags/asm/">asm</a>
+            <span class="count">(3)</span>
+          </div>
+        
+          <div class="tag-item">
+            <i class="fas fa-tag"></i>
+            <a href="../../../../tags/%E9%80%86%E5%90%91/">逆向</a>
+            <span class="count">(3)</span>
+          </div>
+        
+      </div>
+    </div>
+    
+  </div>
+
+  <!-- 主要内容区域 -->
+  <div class="editor-content">
+    <div class="tab-bar">
+      <div class="tab active">
+        <i class="fas fa-file-alt"></i>
+        <span>背包数据分析2.md</span>
+      </div>
+    </div>
+    
+    <div class="content-area">
+      <article class="post-content">
+        <div class="post-header">
+          <h1>背包数据分析2</h1>
+          <div class="post-meta">
+            <span class="date">
+              <i class="fas fa-calendar-alt"></i>
+              2025-12-30
+            </span>            
+              <span class="categories">
+                <i class="fas fa-folder"></i>
+                <div class="categories-list">
+                  <ul class="category-item-post-list"><li class="category-item-post-list-item"><a class="category-item-post-list-link" href="../../../../categories/%E9%80%86%E5%90%91/">逆向</a></li></ul>
+                </div>
+              </span>
+            
+            
+              <span class="tags">
+                <i class="fas fa-tags"></i>
+                <div class="tags-list">
+                  <ul class="tag-item-post-list" itemprop="keywords"><li class="tag-item-post-list-item"><a class="tag-item-post-list-link" href="../../../../tags/asm/" rel="tag">asm</a></li><li class="tag-item-post-list-item"><a class="tag-item-post-list-link" href="../../../../tags/%E9%80%86%E5%90%91/" rel="tag">逆向</a></li></ul>
+                </div>
+              </span>
+            
+          </div>
+        </div>
+        
+        <div class="post-body vscode-markdown">
+          <p>针对武林外传背包的数据分析2</p>
+<ol>
+<li>首先找到背包对象文本来源</li>
+</ol>
+<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><code class="hljs x86asm">004D9B01 | <span class="hljs-number">50</span>                     | <span class="hljs-keyword">push</span> <span class="hljs-built_in">eax</span>                                        | <span class="hljs-built_in">eax</span>:L<span class="hljs-string">&quot;^ff6000&quot;</span><br>004D9B02 | 8D4B <span class="hljs-number">58</span>                | <span class="hljs-keyword">lea</span> <span class="hljs-built_in">ecx</span>,<span class="hljs-built_in">dword</span> <span class="hljs-built_in">ptr</span> <span class="hljs-built_in">ds</span>:[<span class="hljs-built_in">ebx</span>+<span class="hljs-number">58</span>]                   | <span class="hljs-built_in">ecx</span>:&amp;L<span class="hljs-string">&quot;^ffffff九福大补丸0\\r^ff6000不会掉落\\r&quot;</span>, [<span class="hljs-built_in">ebx</span>+<span class="hljs-number">58</span>]:L<span class="hljs-string">&quot;^ffffff九福大补丸0\\r^ff6000不会掉落\\r&quot;</span><br>004D9B05 | E8 360C4E00            | <span class="hljs-keyword">call</span> elementclient<span class="hljs-number">.</span>9BA740                       |<br>004D9B0A | 5F                     | <span class="hljs-keyword">pop</span> <span class="hljs-built_in">edi</span>                                         | <span class="hljs-built_in">edi</span>:&amp;<span class="hljs-string">&quot; €C&quot;</span><br>004D9B0B | 8B8424 <span class="hljs-number">18020000</span>        | <span class="hljs-keyword">mov</span> <span class="hljs-built_in">eax</span>,<span class="hljs-built_in">dword</span> <span class="hljs-built_in">ptr</span> <span class="hljs-built_in">ss</span>:[<span class="hljs-built_in">esp</span>+<span class="hljs-number">218</span>]                  |<br>004D9B12 | 8D9424 1C020000        | <span class="hljs-keyword">lea</span> <span class="hljs-built_in">edx</span>,<span class="hljs-built_in">dword</span> <span class="hljs-built_in">ptr</span> <span class="hljs-built_in">ss</span>:[<span class="hljs-built_in">esp</span>+21C]                  |<br>004D9B19 | <span class="hljs-number">52</span>                     | <span class="hljs-keyword">push</span> <span class="hljs-built_in">edx</span>                                        |<br>004D9B1A | 8D4C24 0C              | <span class="hljs-keyword">lea</span> <span class="hljs-built_in">ecx</span>,<span class="hljs-built_in">dword</span> <span class="hljs-built_in">ptr</span> <span class="hljs-built_in">ss</span>:[<span class="hljs-built_in">esp</span>+C]                    |<br>004D9B1E | <span class="hljs-number">50</span>                     | <span class="hljs-keyword">push</span> <span class="hljs-built_in">eax</span>                                        | <span class="hljs-built_in">eax</span>:L<span class="hljs-string">&quot;^ff6000&quot;</span><br>004D9B1F | <span class="hljs-number">51</span>                     | <span class="hljs-keyword">push</span> <span class="hljs-built_in">ecx</span>                                        | <span class="hljs-built_in">ecx</span>:&amp;L<span class="hljs-string">&quot;^ffffff九福大补丸0\\r^ff6000不会掉落\\r&quot;</span><br>004D9B20 | FF15 C065BC00          | <span class="hljs-keyword">call</span> <span class="hljs-built_in">dword</span> <span class="hljs-built_in">ptr</span> <span class="hljs-built_in">ds</span>:[&lt;vswprintf&gt;]                 |<br><br>004D9AB6 | <span class="hljs-number">53</span>                     | <span class="hljs-keyword">push</span> <span class="hljs-built_in">ebx</span>                                        | <span class="hljs-built_in">ebx</span>:&amp;<span class="hljs-string">&quot;袀L&quot;</span><br>004D9AB7 | 8B9C24 <span class="hljs-number">08020000</span>        | <span class="hljs-keyword">mov</span> <span class="hljs-built_in">ebx</span>,<span class="hljs-built_in">dword</span> <span class="hljs-built_in">ptr</span> <span class="hljs-built_in">ss</span>:[<span class="hljs-built_in">esp</span>+<span class="hljs-number">208</span>]                  | [<span class="hljs-built_in">esp</span>+<span class="hljs-number">208</span>]:Offset+327C9D<br><br><br>004DAC7F | 8B07                   | <span class="hljs-keyword">mov</span> <span class="hljs-built_in">eax</span>,<span class="hljs-built_in">dword</span> <span class="hljs-built_in">ptr</span> <span class="hljs-built_in">ds</span>:[<span class="hljs-built_in">edi</span>]               | <span class="hljs-built_in">eax</span>:L<span class="hljs-string">&quot;九福大补丸0&quot;</span>, [<span class="hljs-built_in">edi</span>]:<span class="hljs-string">&quot;袀L&quot;</span><br>004DAC81 | 8BCF                   | <span class="hljs-keyword">mov</span> <span class="hljs-built_in">ecx</span>,<span class="hljs-built_in">edi</span>                              | <span class="hljs-built_in">ecx</span>:&amp;<span class="hljs-string">&quot;袀L&quot;</span>, <span class="hljs-built_in">edi</span>:&amp;<span class="hljs-string">&quot;袀L&quot;</span><br>004DAC83 | FF50 <span class="hljs-number">18</span>                | <span class="hljs-keyword">call</span> <span class="hljs-built_in">dword</span> <span class="hljs-built_in">ptr</span> <span class="hljs-built_in">ds</span>:[<span class="hljs-built_in">eax</span>+<span class="hljs-number">18</span>]               |<br>004DAC86 | 8B4C24 <span class="hljs-number">10</span>              | <span class="hljs-keyword">mov</span> <span class="hljs-built_in">ecx</span>,<span class="hljs-built_in">dword</span> <span class="hljs-built_in">ptr</span> <span class="hljs-built_in">ss</span>:[<span class="hljs-built_in">esp</span>+<span class="hljs-number">10</span>]            |<br>004DAC8A | <span class="hljs-number">50</span>                     | <span class="hljs-keyword">push</span> <span class="hljs-built_in">eax</span> //<span class="hljs-built_in">eax</span>是上面[<span class="hljs-built_in">eax</span>+<span class="hljs-number">18</span>]返回          | <span class="hljs-built_in">eax</span>:L<span class="hljs-string">&quot;九福大补丸0&quot;</span><br>004DAC8B | <span class="hljs-number">56</span>                     | <span class="hljs-keyword">push</span> <span class="hljs-built_in">esi</span>                                 | <span class="hljs-built_in">esi</span>:L<span class="hljs-string">&quot;%s&quot;</span><br>004DAC8C | 6A <span class="hljs-number">01</span>                  | <span class="hljs-keyword">push</span> <span class="hljs-number">1</span>                                   |<br>004DAC8E | <span class="hljs-number">51</span>                     | <span class="hljs-keyword">push</span> <span class="hljs-built_in">ecx</span>                                 | <span class="hljs-built_in">ecx</span>:&amp;<span class="hljs-string">&quot;袀L&quot;</span><br>004DAC8F | <span class="hljs-number">57</span>                     | <span class="hljs-keyword">push</span> <span class="hljs-built_in">edi</span>                                 | <span class="hljs-built_in">edi</span>:&amp;<span class="hljs-string">&quot;袀L&quot;</span><br>004DAC90 | E8 1BEEFFFF            | <span class="hljs-keyword">call</span> elementclient<span class="hljs-number">.</span>4D9AB0                |<br><br></code></pre></td></tr></table></figure>
+
+<p>call dword ptr ds:[eax+18]:</p>
+<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs x86asm">004C85C0 | 8B81 <span class="hljs-number">80000000</span>          | <span class="hljs-keyword">mov</span> <span class="hljs-built_in">eax</span>,<span class="hljs-built_in">dword</span> <span class="hljs-built_in">ptr</span> <span class="hljs-built_in">ds</span>:[<span class="hljs-built_in">ecx</span>+<span class="hljs-number">80</span>]            | 这里的<span class="hljs-built_in">ecx</span>就是背包对象中的每一个对象<br>004C85C6 | 83C0 0C                | <span class="hljs-keyword">add</span> <span class="hljs-built_in">eax</span>,C                                | <span class="hljs-built_in">eax</span>:L<span class="hljs-string">&quot;九福大补丸0&quot;</span><br>004C85C9 | C3                     | <span class="hljs-keyword">ret</span>                                      |<br><br>背包物品类别=[每个物品对象+<span class="hljs-number">80</span>]+<span class="hljs-number">0x0C</span><br>背包物品名称=[每个物品对象+<span class="hljs-number">78</span>]+<span class="hljs-number">0x04</span><br></code></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>C++实现</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-comment">// 读写.cpp</span><br><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;pch.h&quot;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;Windows.h&gt;</span></span><br><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> 读写权限 0x10</span><br><br>HANDLE 取游戏权限句柄()<br>&#123;<br>	HWND 窗口句柄 = <span class="hljs-built_in">FindWindowA</span>(<span class="hljs-string">&quot;QElementClient Window&quot;</span>, <span class="hljs-string">&quot;Element Client&quot;</span>);<br>	DWORD pid = <span class="hljs-number">0</span>;<br><br>	<span class="hljs-built_in">GetWindowThreadProcessId</span>(窗口句柄, &amp;pid);<br><br>	HANDLE 进程权限句柄 = <span class="hljs-built_in">OpenProcess</span>(<br>		PROCESS_ALL_ACCESS,<br>		FALSE,<br>		pid<br>	);<br><br>	<span class="hljs-keyword">return</span> 进程权限句柄;<br>&#125;<br><br><span class="hljs-function">DWORD <span class="hljs-title">R4</span><span class="hljs-params">(DWORD 地址)</span></span><br><span class="hljs-function"></span>&#123;<br>	HANDLE h = 取游戏权限句柄();<br><br>	DWORD 返回值 = <span class="hljs-number">0</span>;<br>	DWORD 实际读取字节数 = <span class="hljs-number">0</span>;<br>	<span class="hljs-built_in">ReadProcessMemory</span>(h, (LPCVOID)地址, &amp;返回值, <span class="hljs-number">4</span>, &amp;实际读取字节数);<br><br>	<span class="hljs-keyword">if</span> (h)<br>	&#123;<br>		<span class="hljs-built_in">CloseHandle</span>(h);<br>	&#125;<br><br>	<span class="hljs-keyword">return</span> 返回值;<br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">float</span> <span class="hljs-title">R4f</span><span class="hljs-params">(DWORD 地址)</span></span><br><span class="hljs-function"></span>&#123;<br>	HANDLE h = 取游戏权限句柄();<br><br>	<span class="hljs-type">float</span> 返回值 = <span class="hljs-number">0</span>;<br>	DWORD 实际读取字节数 = <span class="hljs-number">0</span>;<br>	<span class="hljs-built_in">ReadProcessMemory</span>(h, (LPCVOID)地址, &amp;返回值, <span class="hljs-number">4</span>, &amp;实际读取字节数);<br><br>	<span class="hljs-keyword">if</span> (h)<br>	&#123;<br>		<span class="hljs-built_in">CloseHandle</span>(h);<br>	&#125;<br><br>	<span class="hljs-keyword">return</span> 返回值;<br>&#125;<br><br><span class="hljs-function">DWORD <span class="hljs-title">W4</span><span class="hljs-params">(DWORD 地址, DWORD 值)</span></span><br><span class="hljs-function"></span>&#123;<br>	HANDLE h = 取游戏权限句柄();<br><br>	DWORD 实际写入字节数 = <span class="hljs-number">0</span>;<br>	BOOL 返回值 = <span class="hljs-built_in">WriteProcessMemory</span>(h, (LPVOID)地址, &amp;值, <span class="hljs-number">4</span>, &amp;实际写入字节数);<br><br>	<span class="hljs-keyword">if</span> (h)<br>	&#123;<br>		<span class="hljs-built_in">CloseHandle</span>(h);<br>	&#125;<br><br>	<span class="hljs-keyword">return</span> 返回值;<br>&#125;<br><br>DWORD 读字符串(DWORD 地址, OUT <span class="hljs-type">char</span> *buf, <span class="hljs-type">size_t</span> len)<br>&#123;<br>	HANDLE h = 取游戏权限句柄();<br><br>	DWORD 实际读取字节数 = <span class="hljs-number">0</span>;<br>	<span class="hljs-built_in">ReadProcessMemory</span>(h, (LPCVOID)地址, buf, len, &amp;实际读取字节数);<br><br>	<span class="hljs-keyword">if</span> (h)<br>	&#123;<br>		<span class="hljs-built_in">CloseHandle</span>(h);<br>	&#125;<br><br>	<span class="hljs-keyword">return</span> 实际读取字节数;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-comment">// MFC_Dlg.cpp</span><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">CMFC07Dlg::OnBnClickedButton1</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>	<span class="hljs-built_in">AllocConsole</span>();<br><br>	FILE* file = <span class="hljs-number">0</span>;<br>	<span class="hljs-built_in">freopen_s</span>(&amp;file, <span class="hljs-string">&quot;CONOUT$&quot;</span>, <span class="hljs-string">&quot;w+t&quot;</span>, stdout);<br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">CMFC07Dlg::OnBnClickedButton3</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;血量=%d\r\n&quot;</span>, <span class="hljs-built_in">R4</span>(<span class="hljs-built_in">R4</span>(<span class="hljs-built_in">R4</span>(<span class="hljs-built_in">R4</span>(<span class="hljs-number">0xD4CE40</span>) + <span class="hljs-number">0x1C</span>) + <span class="hljs-number">0x28</span>) + <span class="hljs-number">0x278</span>));<br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">CMFC07Dlg::OnBnClickedButton4</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>	UINT_PTR 角色对象 = <span class="hljs-built_in">R4</span>(<span class="hljs-built_in">R4</span>(<span class="hljs-built_in">R4</span>(<span class="hljs-number">0xD4CE40</span>) + <span class="hljs-number">0x1C</span>) + <span class="hljs-number">0x28</span>);<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;角色对象=%p\r\n&quot;</span>, 角色对象);<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;坐标(%f, %f, %f) \r\n&quot;</span>, <span class="hljs-built_in">R4f</span>(角色对象 + <span class="hljs-number">0x7DC</span>), <span class="hljs-built_in">R4f</span>(角色对象 + <span class="hljs-number">0x7DC</span><span class="hljs-number">+8</span>), <span class="hljs-built_in">R4f</span>(角色对象 + <span class="hljs-number">0x7DC</span><span class="hljs-number">+4</span>));<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;等级=%u\r\n&quot;</span>, <span class="hljs-built_in">R4</span>(角色对象 + <span class="hljs-number">0x268</span>));<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;血量=%u/%u, 蓝量=%u/%u\r\n&quot;</span>, <span class="hljs-built_in">R4</span>(角色对象 + <span class="hljs-number">0x278</span>), <span class="hljs-built_in">R4</span>(角色对象 + <span class="hljs-number">0x278</span><span class="hljs-number">+0x20</span>), <span class="hljs-built_in">R4</span>(角色对象 + <span class="hljs-number">0x278</span> + <span class="hljs-number">0x4</span>), <span class="hljs-built_in">R4</span>(角色对象 + <span class="hljs-number">0x278</span> + <span class="hljs-number">0x24</span>));<br>	<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\n\n&quot;</span>);<br>&#125;<br><br><span class="hljs-type">void</span> 遍历属性(UINT_PTR 背包对象, <span class="hljs-type">int</span> i)<br>&#123;<br>	DWORD 数量 = <span class="hljs-built_in">R4</span>(背包对象 + <span class="hljs-number">0x20</span>);<br>	DWORD 单价 = <span class="hljs-built_in">R4</span>(背包对象 + <span class="hljs-number">0x28</span>);<br><br>	<span class="hljs-type">wchar_t</span> 名字[<span class="hljs-number">32</span>] = &#123; <span class="hljs-number">0</span> &#125;;<br>	<span class="hljs-type">wchar_t</span> 类别[<span class="hljs-number">32</span>] = &#123; <span class="hljs-number">0</span> &#125;;<br><br>	读字符串(<span class="hljs-built_in">R4</span>(背包对象 + <span class="hljs-number">0x78</span>) + <span class="hljs-number">0x04</span>, (<span class="hljs-type">char</span>*)名字, <span class="hljs-built_in">sizeof</span>(名字));<br>	读字符串(<span class="hljs-built_in">R4</span>(背包对象 + <span class="hljs-number">0x80</span>) + <span class="hljs-number">0x0C</span>, (<span class="hljs-type">char</span>*)类别, <span class="hljs-built_in">sizeof</span>(类别));<br><br>	<span class="hljs-built_in">wprintf</span>(<br>		<span class="hljs-string">L&quot;(%ls, %ls) - p[%2d]=%p  数量=%u  单价=%u铜  (%u)铜\n&quot;</span>,<br>		名字,<br>		类别,<br>		i,<br>		背包对象,<br>		数量,<br>		单价,<br>		数量 * 单价<br>	);<br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">CMFC07Dlg::OnBnClickedButton6</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>	<span class="hljs-comment">// 遍历背包对象</span><br>	<span class="hljs-type">int</span> 背包格子上限 = <span class="hljs-number">32</span>; <span class="hljs-comment">// 144</span><br>	UINT_PTR base = <span class="hljs-number">0xD4CE40</span>;<br><br>	UINT_PTR p1 = <span class="hljs-built_in">R4</span>(base);<br>	UINT_PTR p2 = <span class="hljs-built_in">R4</span>(p1 + <span class="hljs-number">0x1C</span>);<br>	UINT_PTR p3 = <span class="hljs-built_in">R4</span>(p2 + <span class="hljs-number">0x28</span>);<br>	UINT_PTR p4 = <span class="hljs-built_in">R4</span>(p3 + <span class="hljs-number">0x1538</span>);<br>	UINT_PTR p5 = <span class="hljs-built_in">R4</span>(p4 + <span class="hljs-number">0x4</span>);<br>	UINT_PTR p6 = <span class="hljs-built_in">R4</span>(p5 + <span class="hljs-number">0x14A4</span>);<br>	UINT_PTR p7 = <span class="hljs-built_in">R4</span>(p6 + <span class="hljs-number">0xC</span>);<br><br>	<span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; 背包格子上限; i++)<br>	&#123;<br>		UINT_PTR item = <span class="hljs-built_in">R4</span>(p7 + i * <span class="hljs-number">4</span>);<br><br>		<span class="hljs-keyword">if</span> (item)<br>		&#123;<br>			遍历属性(item, i);<br>		&#125;<br>	&#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+        </div>
+        
+        <!-- 文章导航 - 只在同分类有多篇文章时显示 -->
+        
+        
+        
+        <nav class="post-nav">
+          
+          
+            <a class="next" href="../../26/knapsack-object/">
+              背包数据分析
+              <i class="fas fa-chevron-right"></i>
+            </a>
+          
+        </nav>
+        
+        
+        <!-- 推荐文章 -->
+        
+
+
+<div class="vs-recommended-posts">
+  <div class="vs-recommended-header">
+    <div class="section-header">
+      <i class="fas fa-lightbulb"></i>
+      <span>RELATED POSTS</span>
+    </div>
+  </div>
+  
+  <div class="vs-recommended-grid">
+    
+      <div class="vs-recommended-item" data-index="0" tabindex="0">
+        <a href="../../26/knapsack-object/" class="vs-recommended-link">
+          <!-- 文章信息 -->
+          <div class="vs-recommended-content">
+            <div class="vs-recommended-title">
+              <i class="fas fa-file-code"></i>
+              <span>背包数据分析</span>
+            </div>
+            
+            <div class="vs-recommended-excerpt">
+              针对武林外传背包的数据分析 1234567891011121314151617181920004C7E10 | 8B51 10 | mov edx,dword ptr ds:[ecx+10] |004C7E13 | 33C0 | xor e...
+            </div>
+            
+            <div class="vs-recommended-meta">
+              
+              
+              
+                <span class="vs-tags-preview">
+                  <i class="fas fa-tags"></i>
+                  asm, 逆向
+                  
+                </span>
+              
+              
+              <span class="vs-meta-info">
+                <span class="vs-date">
+                  <i class="fas fa-calendar-alt"></i>
+                  Dec 26
+                </span>
+                <span class="vs-reading-time">
+                  <i class="fas fa-clock"></i>
+                  2 min
+                </span>
+              </span>
+            </div>
+          </div>
+        </a>
+      </div>
+    
+      <div class="vs-recommended-item" data-index="1" tabindex="0">
+        <a href="../../26/Character-Object/" class="vs-recommended-link">
+          <!-- 文章信息 -->
+          <div class="vs-recommended-content">
+            <div class="vs-recommended-title">
+              <i class="fas fa-file-code"></i>
+              <span>人物对象查找</span>
+            </div>
+            
+            <div class="vs-recommended-excerpt">
+              武林外传人物对象查找 1234567891011121314151617181920212223242526272829303132角色血量 elementclient.exe+951440=00D51440elementclient.ex...
+            </div>
+            
+            <div class="vs-recommended-meta">
+              
+              
+              
+                <span class="vs-tags-preview">
+                  <i class="fas fa-tags"></i>
+                  asm, 逆向
+                  
+                </span>
+              
+              
+              <span class="vs-meta-info">
+                <span class="vs-date">
+                  <i class="fas fa-calendar-alt"></i>
+                  Dec 26
+                </span>
+                <span class="vs-reading-time">
+                  <i class="fas fa-clock"></i>
+                  3 min
+                </span>
+              </span>
+            </div>
+          </div>
+        </a>
+      </div>
+    
+  </div>
+  
+  <!-- 查看更多 -->
+  <div class="vs-recommended-footer">
+    <a href="../../../../archives/" class="vs-view-more">
+      <i class="fas fa-folder-open"></i>
+      <span>View More Posts</span>
+      <i class="fas fa-chevron-right"></i>
+    </a>
+  </div>
+</div>
+
+<script>
+// 键盘导航支持
+document.addEventListener('DOMContentLoaded', function() {
+  const items = document.querySelectorAll('.vs-recommended-item');
+  let currentIndex = -1;
+  
+  // 键盘事件
+  document.addEventListener('keydown', function(e) {
+    if (!items.length) return;
+    
+    if (e.key === 'Tab') {
+      // Tab键导航由浏览器处理
+      return;
+    }
+    
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      
+      // 移除当前高亮
+      if (currentIndex >= 0) {
+        items[currentIndex].classList.remove('vs-focused');
+      }
+      
+      // 更新索引
+      if (e.key === 'ArrowRight') {
+        currentIndex = (currentIndex + 1) % items.length;
+      } else {
+        currentIndex = currentIndex <= 0 ? items.length - 1 : currentIndex - 1;
+      }
+      
+      // 添加新高亮
+      items[currentIndex].classList.add('vs-focused');
+      items[currentIndex].focus();
+    }
+    
+    if (e.key === 'Enter' && currentIndex >= 0) {
+      const link = items[currentIndex].querySelector('a');
+      if (link) link.click();
+    }
+  });
+  
+  // 鼠标悬停时更新当前索引
+  items.forEach((item, index) => {
+    item.addEventListener('mouseenter', function() {
+      currentIndex = index;
+      items.forEach(i => i.classList.remove('vs-focused'));
+      item.classList.add('vs-focused');
+    });
+  });
+});
+</script>
+
+        
+        <!-- 评论区 -->
+        
+  <div class="vs-comments-section">
+    <div class="section-header">
+      <i class="fas fa-comments"></i>
+      <span>COMMENTS</span>
+    </div>
+    
+    
+      <!-- Waline 评论系统 -->
+      <div id="waline"></div>
+      <script>
+        // 加载 Waline CSS
+        const walineCSS = document.createElement('link');
+        walineCSS.rel = 'stylesheet';
+        walineCSS.href = 'https://unpkg.com/@waline/client@v3/dist/waline.css';
+        document.head.appendChild(walineCSS);
+
+        const walineCustomCSS = document.createElement('link');
+        walineCustomCSS.rel = 'stylesheet';
+        walineCustomCSS.href = '/css/waline-custom.css';
+        document.head.appendChild(walineCustomCSS);
+        
+        // 加载 Waline JS
+        const walineScript = document.createElement('script');
+        walineScript.type = 'module';
+        walineScript.onload = function() {
+          // 确保 Waline 加载后再初始化
+          import('https://unpkg.com/@waline/client@v3/dist/waline.js').then(({ init }) => {
+            const waline = init({
+              el: '#waline',
+              serverURL: 'https://blog-comment-nine-azure.vercel.app/',
+              lang: 'zh-CN',
+              locale: {},
+              emoji: ["https://unpkg.com/@waline/emojis@1.2.0/weibo","https://unpkg.com/@waline/emojis@1.2.0/alus"],
+              requiredMeta: [],
+              login: 'disable',
+              wordLimit: 0,
+              pageSize: 10,
+              imageUploader: false,
+              highlighter: true,
+              texRenderer: false,
+              search: false,
+              pageview: false,
+              comment: true,
+              copyright: false,
+              
+              // 自动适配主题
+              dark: document.documentElement.getAttribute('data-theme') === 'dark' ? 'auto' : false,
+              
+              // 评论框占位符
+              placeholder: 'Feel free to leave a comment, no login required!',
+              
+              // 元数据配置
+              meta: ['nick', 'mail', 'link'],
+              
+              // 表情配置
+              emojiCDN: 'https://unpkg.com/@waline/emojis@1.2.0/',
+            });
+            
+            // 监听主题变化
+            const observer = new MutationObserver((mutations) => {
+              mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+                  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                  // Waline 会自动处理主题切换
+                  if (waline) {
+                    waline.update({ dark: isDark ? 'auto' : false });
+                  }
+                }
+              });
+            });
+            
+            observer.observe(document.documentElement, {
+              attributes: true,
+              attributeFilter: ['data-theme']
+            });
+          });
+        };
+        walineScript.src = 'https://unpkg.com/@waline/client@v3/dist/waline.js';
+        document.body.appendChild(walineScript);
+      </script>
+    
+    
+  </div>
+
+      </article>
+    </div>
+  </div>
+</div>
+
+    </div>
+    <footer class="footer">
+  <div class="status-bar">
+    <div class="status-item">
+      <i class="fas fa-code-branch"></i>
+      master
+    </div>
+    <div class="status-item">
+      <i class="fas fa-sync"></i>
+      tux298
+    </div>
+    <div class="status-item">
+      <i class="fas fa-clock"></i>
+      2025-12-30
+    </div>
+    <!-- <div class="status-item">
+      <a href="https://github.com/tux298" target="_blank">tux298</a>
+    </div> -->
+    <div class="status-item github">
+      <a href="https://github.com/tux298" target="_blank">
+        <i class="fab fa-github"></i>
+      </a>
+    </div>
+  </div>
+</footer>
+
+    
+    <!-- 全局配置 -->
+    <script>
+      window.HEXO_CONFIG = {
+        language: "en",
+        root: "/",
+        
+        theme_switch: {
+          enabled: false,
+          light_start: "06:00",
+          light_end: "18:00"
+        }
+        
+      };
+
+      // 特定于搜索的配置
+      window.VSC4T_SEARCH = {
+        root: "/"
+      };
+    </script>
+    
+    <script src="//cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/highlight.js@11.7.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <!-- 这里可以放置自定义脚本 -->
+<script>
+document.addEventListener('DOMContentLoaded', (event) => {
+  // Apply smooth scroll to non-TOC anchor links
+  document.querySelectorAll('a[href^="#"]:not(.toc-link)').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      // Check if querySelector is valid before using it
+      try {
+        const targetSelector = this.getAttribute('href');
+        // Basic check for potentially invalid selectors (though not exhaustive)
+        if (targetSelector && targetSelector.length > 1) { 
+          const targetElement = document.querySelector(targetSelector);
+          if (targetElement) {
+            targetElement.scrollIntoView({
+              behavior: 'smooth'
+            });
+          } else {
+            console.warn('Smooth scroll target not found:', targetSelector);
+          }
+        } else {
+           console.warn('Invalid href for smooth scroll:', targetSelector);
+        }
+      } catch (error) {
+        console.error('Error during smooth scroll:', error, 'Selector:', this.getAttribute('href'));
+        // Fallback or alternative behavior if needed
+        // For example, try getElementById if it's just an ID
+        const targetId = this.getAttribute('href').slice(1);
+        try {
+            const targetElementById = document.getElementById(decodeURIComponent(targetId));
+            if (targetElementById) {
+                targetElementById.scrollIntoView({ behavior: 'smooth' });
+            }
+        } catch (idError) {
+             console.error('Fallback getElementById also failed:', idError);
+        }
+      }
+    });
+  });
+});
+</script>
+
+<!-- Scripts -->
+<script>
+  // 将语言文件中的翻译传递给前端
+  window.HEXO_CONFIG = {
+    language: "en",
+    search_placeholder: "Type to search...",
+    search_no_results: "No results found",
+    search_result: "result",
+    search_results: "results",
+    search_results_found: "Found undefined results",
+    search_in: "Search in",
+    search_in_title: "Title",
+    search_in_content: "Content",
+    search_in_tags: "Tags",
+    search_in_categories: "Categories",
+    search_filters: "Search Filters",
+    search_recent: "Recent Searches",
+    search_clear: "Clear",
+    search_loading: "Loading...",
+    search_error: "Error loading search data",
+    // Encryption i18n strings
+    encrypt_badge: "Protected",
+    encrypt_title: "Protected Content",
+    encrypt_description: "Enter the password to unlock this article. The password will be saved locally until you choose to re-encrypt.",
+    encrypt_label: "Password",
+    encrypt_placeholder: "Enter password to unlock",
+    encrypt_button: "Unlock",
+    encrypt_button_loading: "Unlocking...",
+    encrypt_hint: "Press Enter to submit. Password will be remembered on this device.",
+    encrypt_success: "Content unlocked successfully!",
+    encrypt_unlocked_note: "Content unlocked. You can re-encrypt at any time.",
+    encrypt_again: "Re-encrypt",
+    encrypt_wrong_password: "Incorrect password. Please try again.",
+    encrypt_show_password: "Show password",
+    encrypt_hide_password: "Hide password"
+  };
+</script>
+
+
+
+<!-- 添加所有需要的脚本 -->
+<script src="../../../../js/main.js"></script>
+<script src="../../../../js/search.js"></script>
+<script src="../../../../js/theme-switch.js"></script>
+
+<script src="../../../../js/password-protect.js?v=1767101536399"></script>
+
+    <script>
+      // 移动端菜单切换
+      $(document).ready(function() {
+        $('.mobile-menu-toggle').click(function() {
+          $('.sidebar-explorer').toggleClass('show');
+        });
+      });
+    </script>
+  </body>
+</html>
