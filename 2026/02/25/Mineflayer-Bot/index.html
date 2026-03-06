@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>使用 Node.js 和 Mineflayer 构建全自动 Minecraft 挖矿机器人 | x86devLog</title>
+  
+  <!-- Favicon 配置 -->
+  
+    
+      <link rel="icon" type="image/x-icon" href="../../../../favicon.ico">
+    
+    
+      <link rel="icon" type="image/png" sizes="16x16" href="../../../../favicon-16x16.png">
+    
+    
+      <link rel="icon" type="image/png" sizes="32x32" href="../../../../favicon-32x32.png">
+    
+    
+      <link rel="icon" type="image/png" sizes="192x192" href="../../../../favicon-192x192.png">
+    
+    
+      <link rel="apple-touch-icon" sizes="180x180" href="../../../../apple-touch-icon.png">
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../../../../css/theme-colors.css">
+  <link rel="stylesheet" href="../../../../css/main.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <!-- 添加代码高亮样式 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+  <!-- 添加highlight.js库 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  <!-- 添加mermaid.js库 -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <link rel="stylesheet" href="../../../../css/code.css">
+  <link rel="stylesheet" href="../../../../css/code-custom.css">
+  <link rel="stylesheet" href="../../../../css/code-languages.css">
+  <link rel="stylesheet" href="../../../../css/mermaid.css">
+
+  <link rel="stylesheet" href="../../../../css/vs-code.css">
+  <link rel="stylesheet" href="../../../../css/post.css?v=1772779485289">
+  <link rel="stylesheet" href="../../../../css/tag.css">
+  <link rel="stylesheet" href="../../../../css/categories.css">
+  <link rel="stylesheet" href="../../../../css/archive.css">
+  <link rel="stylesheet" href="../../../../css/search.css">
+  <link rel="stylesheet" href="../../../../css/mobile.css">  <link rel="stylesheet" href="../../../../css/responsive.css">
+  <link rel="stylesheet" href="../../../../css/elements.css">
+
+  <!-- 添加 JetBrains Mono 字体 -->  
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- Add any custom head content here -->
+
+  <script src="../../../../js/explorer.js"></script>
+  <script src="../../../../js/code-copy.js"></script>
+  <script src="../../../../js/code-enhance.js"></script>
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+  <body>
+    <div class="wrapper">
+      <div class="mobile-menu-toggle">
+        <i class="fas fa-bars"></i>
+      </div>
+      <header class="vs-header">
+  <nav class="vs-nav">
+    <div class="nav-left">
+      <a href="/" class="nav-brand">
+        <i class="fas fa-terminal"></i>
+        x86devLog
+      </a>
+    </div>
+    
+    <div class="nav-right">
+      <a href="/" class="nav-item ">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+      </a>
+      <a href="/archives/" class="nav-item ">
+        <i class="fas fa-archive"></i>
+        <span>Archives</span>
+      </a>
+      <a href="/categories/" class="nav-item ">
+        <i class="fas fa-folder"></i>
+        <span>Categories</span>
+      </a>
+      <a href="/tags/" class="nav-item ">
+        <i class="fas fa-tags"></i>
+        <span>Tags</span>
+      </a>
+      <a href="/search/" class="nav-item ">
+        <i class="fas fa-search"></i>
+        <span>Search</span>
+      </a>
+      <a href="/about/" class="nav-item ">
+        <i class="fas fa-info-circle"></i>
+        <span>About</span>
+      </a>
+    </div>
+  </nav>
+</header>
+
+<script>
+  function smoothScroll(event, target) {
+    event.preventDefault();
+    const targetId = target.substring(target.indexOf('#') + 1);
+    const targetElement = document.getElementById(targetId);
+
+    if (targetElement) {
+      window.scrollTo({
+        top: targetElement.offsetTop - 50, // 调整偏移量
+        behavior: 'smooth'
+      });
+    } else {
+      window.location.href = target;
+    }
+  }
+
+  window.addEventListener('scroll', function() {
+    const header = document.querySelector('.vs-header');
+    const nav = document.querySelector('.vs-nav');
+    const scrollPercent = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+    
+    nav.style.setProperty('--scroll-percent', `${scrollPercent}%`);
+    
+    if (window.scrollY > 0) {
+      header.classList.add('scrolled');
+    } else {
+      header.classList.remove('scrolled');
+    }
+  });
+
+  // 添加标签页切换动画
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', function(e) {
+      const ripple = document.createElement('span');
+      ripple.classList.add('nav-ripple');
+      this.appendChild(ripple);
+      
+      const rect = this.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      ripple.style.left = `${x}px`;
+      ripple.style.top = `${y}px`;
+      
+      setTimeout(() => ripple.remove(), 1000);
+    });
+  });
+</script>
+
+
+<div class="vscode-container">
+  <!-- 左侧资源管理器 -->
+  <div class="sidebar-explorer">
+    <!-- TOC导航 -->
+    <div class="explorer-section">
+      <div class="section-header">
+        <i class="fas fa-list"></i>
+        <span>TABLE OF CONTENTS</span>
+      </div>
+      <div class="section-content">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A1%B9%E7%9B%AE%E6%A6%82%E8%A7%88"><span class="toc-text">项目概览</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="toc-text">环境准备</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E4%BB%A3%E7%A0%81%E8%A7%A3%E6%9E%90"><span class="toc-text">核心代码解析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E9%A1%B9%E7%9B%AE%E5%85%A5%E5%8F%A3-bot-js"><span class="toc-text">1. 项目入口 (bot.js)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6-conf-js"><span class="toc-text">2. 配置文件 (conf.js)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E6%8C%87%E4%BB%A4%E5%A4%84%E7%90%86-lib-commands-js"><span class="toc-text">3. 指令处理 (lib&#x2F;commands.js)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E8%87%AA%E5%8A%A8%E6%8C%96%E7%9F%BF%E9%80%BB%E8%BE%91-lib-mining-js"><span class="toc-text">4. 自动挖矿逻辑 (lib&#x2F;mining.js)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B7%B1%E5%85%A5%E7%AE%97%E6%B3%95%E4%B8%8E%E6%8A%80%E6%9C%AF%E6%8C%91%E6%88%98"><span class="toc-text">深入算法与技术挑战</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E7%89%A9%E7%90%86%E6%A8%A1%E6%8B%9F%EF%BC%9A%E8%B7%B3%E8%B7%83%E6%90%AD%E6%A1%A5-Fast-Towering"><span class="toc-text">1. 物理模拟：跳跃搭桥 (Fast Towering)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%8A%A8%E6%80%81%E9%81%BF%E9%9A%9C%EF%BC%9AHead-Crack-%E9%80%BB%E8%BE%91"><span class="toc-text">2. 动态避障：Head Crack 逻辑</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-A-%E5%AF%BB%E8%B7%AF%E4%B8%8E%E4%BB%A3%E4%BB%B7%E8%AF%84%E4%BC%B0"><span class="toc-text">3. A* 寻路与代价评估</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E7%9F%BF%E7%89%A9%E6%90%9C%E7%B4%A2%E7%AE%97%E6%B3%95"><span class="toc-text">4. 矿物搜索算法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8A%9F%E8%83%BD%E6%BC%94%E7%A4%BA"><span class="toc-text">功能演示</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol>
+      </div>
+    </div>
+    
+    <!-- 同分类文章 -->
+    
+    <div class="explorer-section">
+      <div class="section-header">
+        <i class="fas fa-folder"></i>
+        <span>CATEGORY POSTS</span>
+      </div>
+      <div class="section-content">
+        
+      </div>
+    </div>
+    
+    
+    <!-- 标签列表 -->
+    
+    <div class="explorer-section">
+      <div class="section-header">
+        <i class="fas fa-tags"></i>
+        <span>ARTICLE TAGS</span>
+      </div>
+      <div class="section-content">
+        
+          <div class="tag-item">
+            <i class="fas fa-tag"></i>
+            <a href="../../../../tags/%E8%87%AA%E5%8A%A8%E5%8C%96/">自动化</a>
+            <span class="count">(2)</span>
+          </div>
+        
+          <div class="tag-item">
+            <i class="fas fa-tag"></i>
+            <a href="../../../../tags/Node-js/">Node.js</a>
+            <span class="count">(1)</span>
+          </div>
+        
+          <div class="tag-item">
+            <i class="fas fa-tag"></i>
+            <a href="../../../../tags/Minecraft/">Minecraft</a>
+            <span class="count">(1)</span>
+          </div>
+        
+          <div class="tag-item">
+            <i class="fas fa-tag"></i>
+            <a href="../../../../tags/Mineflayer/">Mineflayer</a>
+            <span class="count">(1)</span>
+          </div>
+        
+      </div>
+    </div>
+    
+  </div>
+
+  <!-- 主要内容区域 -->
+  <div class="editor-content">
+    <div class="tab-bar">
+      <div class="tab active">
+        <i class="fas fa-file-alt"></i>
+        <span>使用 Node.js 和 Mineflayer 构建全自动 Minecraft 挖矿机器人.md</span>
+      </div>
+    </div>
+    
+    <div class="content-area">
+      <article class="post-content">
+        <div class="post-header">
+          <h1>使用 Node.js 和 Mineflayer 构建全自动 Minecraft 挖矿机器人</h1>
+          <div class="post-meta">
+            <span class="date">
+              <i class="fas fa-calendar-alt"></i>
+              2026-02-25
+            </span>            
+              <span class="categories">
+                <i class="fas fa-folder"></i>
+                <div class="categories-list">
+                  <ul class="category-item-post-list"><li class="category-item-post-list-item"><a class="category-item-post-list-link" href="../../../../categories/JavaScript/">JavaScript</a></li></ul>
+                </div>
+              </span>
+            
+            
+              <span class="tags">
+                <i class="fas fa-tags"></i>
+                <div class="tags-list">
+                  <ul class="tag-item-post-list" itemprop="keywords"><li class="tag-item-post-list-item"><a class="tag-item-post-list-link" href="../../../../tags/Minecraft/" rel="tag">Minecraft</a></li><li class="tag-item-post-list-item"><a class="tag-item-post-list-link" href="../../../../tags/Mineflayer/" rel="tag">Mineflayer</a></li><li class="tag-item-post-list-item"><a class="tag-item-post-list-link" href="../../../../tags/Node-js/" rel="tag">Node.js</a></li><li class="tag-item-post-list-item"><a class="tag-item-post-list-link" href="../../../../tags/%E8%87%AA%E5%8A%A8%E5%8C%96/" rel="tag">自动化</a></li></ul>
+                </div>
+              </span>
+            
+          </div>
+        </div>
+        
+        <div class="post-body vscode-markdown">
+          <p>在 Minecraft 服务器中，挖矿往往是一项重复且耗时的工作。本文将介绍如何使用 Node.js 和 <a target="_blank" rel="noopener" href="https://github.com/PrismarineJS/mineflayer">Mineflayer</a> 库开发一个自动挖矿机器人（Bot）。这个机器人不仅能够自动寻找并挖掘珍贵矿物，还支持聊天指令控制、自动寻路回家以及物品存储功能。</p>
+<h2 id="项目概览"><a href="#项目概览" class="headerlink" title="项目概览"></a>项目概览</h2><p>本项目是一个基于 <code>mineflayer</code> 的 Minecraft 机器人，主要功能包括：</p>
+<ul>
+<li><strong>自动挖矿</strong>：自动寻找并挖掘钻石、绿宝石等珍贵矿石。</li>
+<li><strong>指令控制</strong>：通过游戏内聊天窗口发送指令控制机器人。</li>
+<li><strong>自动寻路</strong>：使用 <code>mineflayer-pathfinder</code> 插件实现复杂地形的自动寻路。</li>
+<li><strong>物品管理</strong>：支持查看背包、丢弃物品以及自动存入箱子。</li>
+<li><strong>断线重连与死亡恢复</strong>：具备基本的错误处理和自动恢复机制。</li>
+</ul>
+<h2 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h2><p>在开始之前，请确保你已经安装了以下环境：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://nodejs.org/">Node.js</a> (建议版本 v14+)</li>
+<li>一个 Minecraft 服务器 (支持 Java 版)</li>
+</ul>
+<h2 id="核心代码解析"><a href="#核心代码解析" class="headerlink" title="核心代码解析"></a>核心代码解析</h2><h3 id="1-项目入口-bot-js"><a href="#1-项目入口-bot-js" class="headerlink" title="1. 项目入口 (bot.js)"></a>1. 项目入口 (bot.js)</h3><p><code>bot.js</code> 是机器人的入口文件，主要负责初始化机器人实例、加载插件以及注册事件监听器。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-keyword">const</span> mineflayer = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;mineflayer&#x27;</span>);<br><span class="hljs-keyword">const</span> &#123; pathfinder &#125; = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;mineflayer-pathfinder&#x27;</span>);<br><span class="hljs-keyword">const</span> events = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;./lib/events&#x27;</span>);<br><span class="hljs-keyword">const</span> commands = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;./lib/commands&#x27;</span>);<br><br><span class="hljs-comment">// 配置机器人连接信息</span><br><span class="hljs-keyword">const</span> options = &#123;<br>    <span class="hljs-attr">host</span>: <span class="hljs-string">&#x27;your.minecraft.server.com&#x27;</span>, <span class="hljs-comment">// 替换为你的服务器地址</span><br>    <span class="hljs-attr">port</span>: <span class="hljs-number">25565</span>,                       <span class="hljs-comment">// 替换为你的服务器端口</span><br>    <span class="hljs-attr">username</span>: <span class="hljs-string">&#x27;BotName&#x27;</span>                <span class="hljs-comment">// 机器人的游戏ID</span><br>&#125;;<br><br><span class="hljs-keyword">const</span> bot = mineflayer.<span class="hljs-title function_">createBot</span>(options);<br><br><span class="hljs-comment">// 加载寻路插件</span><br>bot.<span class="hljs-title function_">loadPlugin</span>(pathfinder);<br><br><span class="hljs-comment">// 注册事件处理</span><br>events.<span class="hljs-title function_">registerEvents</span>(bot);<br><br><span class="hljs-comment">// 监听聊天事件，处理指令</span><br>bot.<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;chat&#x27;</span>, <span class="hljs-title function_">async</span> (username, message) =&gt; &#123;<br>    <span class="hljs-keyword">try</span> &#123;<br>        <span class="hljs-keyword">await</span> commands.<span class="hljs-title function_">handleChat</span>(bot, username, message);<br>    &#125; <span class="hljs-keyword">catch</span> (err) &#123;<br>        <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">error</span>(<span class="hljs-string">&#x27;Chat handling error:&#x27;</span>, err);<br>    &#125;<br>&#125;);<br></code></pre></td></tr></table></figure>
+
+<h3 id="2-配置文件-conf-js"><a href="#2-配置文件-conf-js" class="headerlink" title="2. 配置文件 (conf.js)"></a>2. 配置文件 (conf.js)</h3><p>为了方便管理，我们将机器人的配置项提取到了 <code>conf.js</code> 中。这里定义了管理员名单、目标矿物以及其他行为参数。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-comment">// 管理员名单，只有名单内的玩家指令才会被执行</span><br><span class="hljs-keyword">const</span> ops = [<span class="hljs-string">&#x27;your_admin_username&#x27;</span>];<br><br><span class="hljs-keyword">const</span> searchRadius = <span class="hljs-number">50</span>; <span class="hljs-comment">// 搜索矿物的半径</span><br><span class="hljs-keyword">const</span> digCost = <span class="hljs-number">1</span>;<br><br><span class="hljs-comment">// 定义需要挖掘的珍贵矿物</span><br><span class="hljs-keyword">const</span> valuableBlocks = [<br>    <span class="hljs-string">&#x27;diamond_ore&#x27;</span>,        <span class="hljs-comment">// 钻石矿石</span><br>    <span class="hljs-string">&#x27;deepslate_diamond_ore&#x27;</span>,<br>    <span class="hljs-string">&#x27;emerald_ore&#x27;</span>,        <span class="hljs-comment">// 绿宝石矿石</span><br>    <span class="hljs-comment">// 可以根据需要添加其他矿石，如 iron_ore, gold_ore 等</span><br>];<br><br><span class="hljs-variable language_">module</span>.<span class="hljs-property">exports</span> = &#123;<br>    valuableBlocks,<br>    ops,<br>    searchRadius,<br>    digCost,<br>    <span class="hljs-comment">// ... 其他配置</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="3-指令处理-lib-commands-js"><a href="#3-指令处理-lib-commands-js" class="headerlink" title="3. 指令处理 (lib&#x2F;commands.js)"></a>3. 指令处理 (lib&#x2F;commands.js)</h3><p>机器人通过监听 <code>chat</code> 事件来接收指令。为了安全起见，我们只响应配置在 <code>ops</code> 列表中的管理员发出的指令。</p>
+<p>支持的主要指令包括：</p>
+<ul>
+<li><code>run</code>: 开始自动挖矿</li>
+<li><code>stop</code>: 停止当前行动</li>
+<li><code>bag</code>: 列出背包中的物品</li>
+<li><code>home</code>: 传送到管理员身边 (需要服务器开启 &#x2F;tp 权限)</li>
+<li><code>save</code>: 自动寻找附近的箱子并存放物品</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">handleChat</span>(<span class="hljs-params">bot, username, message</span>) &#123;<br>    <span class="hljs-comment">// 忽略机器人自己的消息</span><br>    <span class="hljs-keyword">if</span> (username === bot.<span class="hljs-property">username</span>) <span class="hljs-keyword">return</span>;<br>    <span class="hljs-comment">// 权限检查</span><br>    <span class="hljs-keyword">if</span> (!config.<span class="hljs-property">ops</span>.<span class="hljs-title function_">includes</span>(username)) <span class="hljs-keyword">return</span>;<br><br>    <span class="hljs-keyword">if</span> (message === <span class="hljs-string">&#x27;run&#x27;</span>) &#123;<br>        <span class="hljs-keyword">if</span> (state.<span class="hljs-property">mining</span>) &#123;<br>            bot.<span class="hljs-title function_">chat</span>(<span class="hljs-string">&#x27;已经在挖矿了!&#x27;</span>);<br>            <span class="hljs-keyword">return</span>;<br>        &#125;<br>        state.<span class="hljs-property">mining</span> = <span class="hljs-literal">true</span>;<br>        bot.<span class="hljs-title function_">chat</span>(<span class="hljs-string">&#x27;开始自动挖矿&#x27;</span>);<br>        mining.<span class="hljs-title function_">mineLoop</span>(bot); <span class="hljs-comment">// 进入挖矿循环</span><br>    &#125;<br><br>    <span class="hljs-comment">// ... 处理其他指令</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="4-自动挖矿逻辑-lib-mining-js"><a href="#4-自动挖矿逻辑-lib-mining-js" class="headerlink" title="4. 自动挖矿逻辑 (lib&#x2F;mining.js)"></a>4. 自动挖矿逻辑 (lib&#x2F;mining.js)</h3><p>这是机器人的核心逻辑。<code>mineLoop</code> 函数是一个持续运行的循环，它不断寻找附近的珍贵矿物并前往挖掘。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">mineLoop</span>(<span class="hljs-params">bot</span>) &#123;<br>    <span class="hljs-keyword">while</span> (state.<span class="hljs-property">mining</span>) &#123;<br>        <span class="hljs-comment">// 寻找附近的珍贵矿物</span><br>        <span class="hljs-keyword">const</span> block = <span class="hljs-title function_">findNearestValuableBlocks</span>(bot, config.<span class="hljs-property">searchRadius</span>);<br><br>        <span class="hljs-keyword">if</span> (block) &#123;<br>            <span class="hljs-comment">// 使用 pathfinder 移动到矿物位置</span><br>            <span class="hljs-keyword">await</span> bot.<span class="hljs-property">pathfinder</span>.<span class="hljs-title function_">goto</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">GoalBlock</span>(block.<span class="hljs-property">position</span>.<span class="hljs-property">x</span>, block.<span class="hljs-property">position</span>.<span class="hljs-property">y</span>, block.<span class="hljs-property">position</span>.<span class="hljs-property">z</span>));<br>            <br>            <span class="hljs-comment">// 装备镐子并挖掘</span><br>            <span class="hljs-keyword">await</span> <span class="hljs-title function_">equipPickaxe</span>(bot);<br>            <span class="hljs-keyword">await</span> bot.<span class="hljs-title function_">dig</span>(block);<br>        &#125; <span class="hljs-keyword">else</span> &#123;<br>            <span class="hljs-comment">// 如果附近没有矿物，可以执行随机游荡或继续探索的逻辑</span><br>            bot.<span class="hljs-title function_">chat</span>(<span class="hljs-string">&#x27;附近没有发现目标矿物&#x27;</span>);<br>            <span class="hljs-keyword">break</span>; <br>        &#125;<br>    &#125;<br>&#125;<br><br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 搜索半径内最近的珍贵矿石</span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">function</span> <span class="hljs-title function_">findNearestValuableBlocks</span>(<span class="hljs-params">bot, radius</span>) &#123;<br>    <span class="hljs-keyword">return</span> bot.<span class="hljs-title function_">findBlock</span>(&#123;<br>        <span class="hljs-attr">matching</span>: <span class="hljs-function">(<span class="hljs-params">blk</span>) =&gt;</span> &#123;<br>            <span class="hljs-comment">// 根据配置文件中的列表匹配矿物名称</span><br>            <span class="hljs-keyword">return</span> config.<span class="hljs-property">valuableBlocks</span>.<span class="hljs-title function_">includes</span>(blk.<span class="hljs-property">name</span>);<br>        &#125;,<br>        <span class="hljs-attr">maxDistance</span>: radius,<br>        <span class="hljs-attr">count</span>: <span class="hljs-number">1</span> <span class="hljs-comment">// 只返回最近的一个</span><br>    &#125;);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>逻辑解析</strong>：</p>
+<ul>
+<li>**<code>findNearestValuableBlocks</code>**：利用 <code>mineflayer</code> 内置的 <code>findBlock</code> API。它在指定的 <code>radius</code> 半径内（通常为 50 格）进行 3D 空间搜索。</li>
+<li>**匹配器 (Matching)**：通过回调函数过滤方块，只有在 <code>conf.js</code> 中定义的矿石才会被选中。</li>
+<li><strong>循环机制</strong>：<code>mineLoop</code> 采用 <code>while</code> 循环，确保机器人在挖掘完一个矿石后，立即开始下一次搜索，实现全自动作业。</li>
+</ul>
+<h2 id="深入算法与技术挑战"><a href="#深入算法与技术挑战" class="headerlink" title="深入算法与技术挑战"></a>深入算法与技术挑战</h2><p>除了基础的连接和指令，本项目还涉及了一些有趣的“算法”和物理模拟技巧，这使得机器人更像一个真实的玩家。</p>
+<h3 id="1-物理模拟：跳跃搭桥-Fast-Towering"><a href="#1-物理模拟：跳跃搭桥-Fast-Towering" class="headerlink" title="1. 物理模拟：跳跃搭桥 (Fast Towering)"></a>1. 物理模拟：跳跃搭桥 (Fast Towering)</h3><p>在 <code>mining.js</code> 中，我们实现了一个 <code>fastTower</code> 函数，让机器人能够像真人玩家一样“原地起跳并在脚下放路”。这需要精确的物理状态同步。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-keyword">function</span> <span class="hljs-title function_">waitForApex</span>(<span class="hljs-params">bot</span>) &#123;<br>    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Promise</span>(<span class="hljs-function"><span class="hljs-params">resolve</span> =&gt;</span> &#123;<br>        <span class="hljs-keyword">const</span> <span class="hljs-title function_">check</span> = (<span class="hljs-params"></span>) =&gt; &#123;<br>            <span class="hljs-comment">// 当垂直速度 y 接近 0 时，认为到达跳跃最高点 (Apex)</span><br>            <span class="hljs-keyword">if</span> (<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">abs</span>(bot.<span class="hljs-property">entity</span>.<span class="hljs-property">velocity</span>.<span class="hljs-property">y</span>) &lt; <span class="hljs-number">0.02</span>) &#123;<br>                bot.<span class="hljs-title function_">off</span>(<span class="hljs-string">&#x27;physicsTick&#x27;</span>, check);<br>                <span class="hljs-title function_">resolve</span>();<br>            &#125;<br>        &#125;;<br>        bot.<span class="hljs-title function_">on</span>(<span class="hljs-string">&#x27;physicsTick&#x27;</span>, check);<br>    &#125;);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>解析</strong>：</p>
+<ul>
+<li><strong>物理监听</strong>：通过监听 <code>physicsTick</code> 事件（每秒 20 次），实时监测机器人的速度向量。</li>
+<li><strong>顶点检测</strong>：当 <code>velocity.y</code> 几乎为零时，意味着机器人到达了跳跃的最高点。此时放置方块的成功率最高，且不容易被方块“卡住”。</li>
+</ul>
+<h3 id="2-动态避障：Head-Crack-逻辑"><a href="#2-动态避障：Head-Crack-逻辑" class="headerlink" title="2. 动态避障：Head Crack 逻辑"></a>2. 动态避障：Head Crack 逻辑</h3><p>在进行移动或起跳前，机器人会预先检查头顶空间，这就是 <code>headCrack</code> 算法：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">headCrack</span>(<span class="hljs-params">bot</span>) &#123;<br>    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> yOffset <span class="hljs-keyword">of</span> [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>]) &#123;<br>        <span class="hljs-keyword">const</span> checkPos = bot.<span class="hljs-property">entity</span>.<span class="hljs-property">position</span>.<span class="hljs-title function_">offset</span>(<span class="hljs-number">0</span>, yOffset, <span class="hljs-number">0</span>);<br>        <span class="hljs-keyword">const</span> block = bot.<span class="hljs-title function_">blockAt</span>(checkPos);<br><br>        <span class="hljs-comment">// 如果上方有阻挡，则自动挖掘清理</span><br>        <span class="hljs-keyword">if</span> (block &amp;&amp; block.<span class="hljs-property">name</span> !== <span class="hljs-string">&#x27;air&#x27;</span> &amp;&amp; block.<span class="hljs-property">boundingBox</span> === <span class="hljs-string">&#x27;block&#x27;</span>) &#123;<br>            <span class="hljs-keyword">await</span> <span class="hljs-title function_">equipPickaxe</span>(bot);<br>            <span class="hljs-keyword">await</span> bot.<span class="hljs-title function_">dig</span>(block);<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>这种“先清理，后行动”的防御式编程，极大地提高了机器人在复杂地形（如洞穴、狭窄矿道）中的生存率。</p>
+<h3 id="3-A-寻路与代价评估"><a href="#3-A-寻路与代价评估" class="headerlink" title="3. A* 寻路与代价评估"></a>3. A* 寻路与代价评估</h3><p>机器人依赖 <code>mineflayer-pathfinder</code> 实现 A* 寻路。在 <code>events.js</code> 中，我们对其进行了深度配置：</p>
+<ul>
+<li>**挖掘代价 (canDig)**：允许路径规划算法考虑通过挖掘方块来开辟路径，而不仅仅是走空地。</li>
+<li>**原地搭桥 (allow1by1towers)**：允许机器人通过脚下垫方块（搭桥）来垂直上升。</li>
+<li>**流体保护 (dontCreateFlow)**：防止机器人在挖掘时意外触发岩浆或水流。</li>
+</ul>
+<h3 id="4-矿物搜索算法"><a href="#4-矿物搜索算法" class="headerlink" title="4. 矿物搜索算法"></a>4. 矿物搜索算法</h3><p>在寻找矿物时，我们使用了简单的空间索引搜索。通过 <code>bot.findBlock</code> 配合 <code>matching</code> 函数，可以在 O(N) 时间复杂度（N 为周围方块数）内快速定位最近的目标。</p>
+<h2 id="功能演示"><a href="#功能演示" class="headerlink" title="功能演示"></a>功能演示</h2><ol>
+<li><strong>启动机器人</strong>：运行 <code>node bot.js</code>，机器人将加入服务器。</li>
+<li><strong>开始工作</strong>：在游戏中对机器人输入 <code>run</code>，它将开始自动寻找并挖掘配置中的矿石。</li>
+<li><strong>查看状态</strong>：输入 <code>bag</code> 可以查看机器人当前的背包物品。</li>
+<li><strong>停止工作</strong>：输入 <code>stop</code> 让机器人停下脚步。</li>
+</ol>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>通过 Mineflayer，我们可以用几十行代码实现一个功能强大的 Minecraft 机器人。本项目的代码结构清晰，通过模块化设计（events, commands, mining 等）使得功能易于扩展。你可以在此基础上增加更多功能，例如自动打怪、自动种植或者建筑功能。</p>
+<hr>
+<p><em>注：请遵守服务器规则，不要在禁止使用 Bot 的服务器上运行此程序。</em></p>
+
+        </div>
+        
+        <!-- 文章导航 - 只在同分类有多篇文章时显示 -->
+        
+        
+        
+        
+        <!-- 推荐文章 -->
+        
+
+
+<div class="vs-recommended-posts">
+  <div class="vs-recommended-header">
+    <div class="section-header">
+      <i class="fas fa-lightbulb"></i>
+      <span>RELATED POSTS</span>
+    </div>
+  </div>
+  
+  <div class="vs-recommended-grid">
+    
+      <div class="vs-recommended-item" data-index="0" tabindex="0">
+        <a href="../../../03/06/GutAndLiver/" class="vs-recommended-link">
+          <!-- 文章信息 -->
+          <div class="vs-recommended-content">
+            <div class="vs-recommended-title">
+              <i class="fas fa-file-code"></i>
+              <span>使用 Python 自动化下载 Gut and Liver 期刊 PDF</span>
+            </div>
+            
+            <div class="vs-recommended-excerpt">
+              使用 Python 自动化下载 Gut and Liver 期刊 PDF最近我写了一个 Python 爬虫，自动抓取并下载 Gut and Liver 期刊的文章 PDF，并将信息保存到 CSV 文件中。这里总结一下核心代码结构和分析。 核...
+            </div>
+            
+            <div class="vs-recommended-meta">
+              
+              
+              
+                <span class="vs-tags-preview">
+                  <i class="fas fa-tags"></i>
+                  Python, 爬虫, 自动化
+                  
+                </span>
+              
+              
+              <span class="vs-meta-info">
+                <span class="vs-date">
+                  <i class="fas fa-calendar-alt"></i>
+                  Mar 06
+                </span>
+                <span class="vs-reading-time">
+                  <i class="fas fa-clock"></i>
+                  2 min
+                </span>
+              </span>
+            </div>
+          </div>
+        </a>
+      </div>
+    
+      <div class="vs-recommended-item" data-index="1" tabindex="0">
+        <a href="../../../../2025/12/30/knapsack-object2/" class="vs-recommended-link">
+          <!-- 文章信息 -->
+          <div class="vs-recommended-content">
+            <div class="vs-recommended-title">
+              <i class="fas fa-file-code"></i>
+              <span>背包数据分析2</span>
+            </div>
+            
+            <div class="vs-recommended-excerpt">
+              针对武林外传背包的数据分析2 首先找到背包对象文本来源 123456789101112131415161718192021222324252627004D9B01 | 50 | push eax | eax:L&amp;quot;^ff6000&amp;q...
+            </div>
+            
+            <div class="vs-recommended-meta">
+              
+              
+              
+                <span class="vs-tags-preview">
+                  <i class="fas fa-tags"></i>
+                  asm, 逆向
+                  
+                </span>
+              
+              
+              <span class="vs-meta-info">
+                <span class="vs-date">
+                  <i class="fas fa-calendar-alt"></i>
+                  Dec 30
+                </span>
+                <span class="vs-reading-time">
+                  <i class="fas fa-clock"></i>
+                  3 min
+                </span>
+              </span>
+            </div>
+          </div>
+        </a>
+      </div>
+    
+      <div class="vs-recommended-item" data-index="2" tabindex="0">
+        <a href="../../../../2025/12/26/knapsack-object/" class="vs-recommended-link">
+          <!-- 文章信息 -->
+          <div class="vs-recommended-content">
+            <div class="vs-recommended-title">
+              <i class="fas fa-file-code"></i>
+              <span>背包数据分析</span>
+            </div>
+            
+            <div class="vs-recommended-excerpt">
+              针对武林外传背包的数据分析 1234567891011121314151617181920004C7E10 | 8B51 10 | mov edx,dword ptr ds:[ecx+10] |004C7E13 | 33C0 | xor e...
+            </div>
+            
+            <div class="vs-recommended-meta">
+              
+              
+              
+                <span class="vs-tags-preview">
+                  <i class="fas fa-tags"></i>
+                  asm, 逆向
+                  
+                </span>
+              
+              
+              <span class="vs-meta-info">
+                <span class="vs-date">
+                  <i class="fas fa-calendar-alt"></i>
+                  Dec 26
+                </span>
+                <span class="vs-reading-time">
+                  <i class="fas fa-clock"></i>
+                  2 min
+                </span>
+              </span>
+            </div>
+          </div>
+        </a>
+      </div>
+    
+      <div class="vs-recommended-item" data-index="3" tabindex="0">
+        <a href="../../../../2025/12/26/Character-Object/" class="vs-recommended-link">
+          <!-- 文章信息 -->
+          <div class="vs-recommended-content">
+            <div class="vs-recommended-title">
+              <i class="fas fa-file-code"></i>
+              <span>人物对象查找</span>
+            </div>
+            
+            <div class="vs-recommended-excerpt">
+              武林外传人物对象查找 1234567891011121314151617181920212223242526272829303132角色血量 elementclient.exe+951440=00D51440elementclient.ex...
+            </div>
+            
+            <div class="vs-recommended-meta">
+              
+              
+              
+                <span class="vs-tags-preview">
+                  <i class="fas fa-tags"></i>
+                  asm, 逆向
+                  
+                </span>
+              
+              
+              <span class="vs-meta-info">
+                <span class="vs-date">
+                  <i class="fas fa-calendar-alt"></i>
+                  Dec 26
+                </span>
+                <span class="vs-reading-time">
+                  <i class="fas fa-clock"></i>
+                  3 min
+                </span>
+              </span>
+            </div>
+          </div>
+        </a>
+      </div>
+    
+  </div>
+  
+  <!-- 查看更多 -->
+  <div class="vs-recommended-footer">
+    <a href="../../../../archives/" class="vs-view-more">
+      <i class="fas fa-folder-open"></i>
+      <span>View More Posts</span>
+      <i class="fas fa-chevron-right"></i>
+    </a>
+  </div>
+</div>
+
+<script>
+// 键盘导航支持
+document.addEventListener('DOMContentLoaded', function() {
+  const items = document.querySelectorAll('.vs-recommended-item');
+  let currentIndex = -1;
+  
+  // 键盘事件
+  document.addEventListener('keydown', function(e) {
+    if (!items.length) return;
+    
+    if (e.key === 'Tab') {
+      // Tab键导航由浏览器处理
+      return;
+    }
+    
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      
+      // 移除当前高亮
+      if (currentIndex >= 0) {
+        items[currentIndex].classList.remove('vs-focused');
+      }
+      
+      // 更新索引
+      if (e.key === 'ArrowRight') {
+        currentIndex = (currentIndex + 1) % items.length;
+      } else {
+        currentIndex = currentIndex <= 0 ? items.length - 1 : currentIndex - 1;
+      }
+      
+      // 添加新高亮
+      items[currentIndex].classList.add('vs-focused');
+      items[currentIndex].focus();
+    }
+    
+    if (e.key === 'Enter' && currentIndex >= 0) {
+      const link = items[currentIndex].querySelector('a');
+      if (link) link.click();
+    }
+  });
+  
+  // 鼠标悬停时更新当前索引
+  items.forEach((item, index) => {
+    item.addEventListener('mouseenter', function() {
+      currentIndex = index;
+      items.forEach(i => i.classList.remove('vs-focused'));
+      item.classList.add('vs-focused');
+    });
+  });
+});
+</script>
+
+        
+        <!-- 评论区 -->
+        
+  <div class="vs-comments-section">
+    <div class="section-header">
+      <i class="fas fa-comments"></i>
+      <span>COMMENTS</span>
+    </div>
+    
+    
+      <!-- Waline 评论系统 -->
+      <div id="waline"></div>
+      <script>
+        // 加载 Waline CSS
+        const walineCSS = document.createElement('link');
+        walineCSS.rel = 'stylesheet';
+        walineCSS.href = 'https://unpkg.com/@waline/client@v3/dist/waline.css';
+        document.head.appendChild(walineCSS);
+
+        const walineCustomCSS = document.createElement('link');
+        walineCustomCSS.rel = 'stylesheet';
+        walineCustomCSS.href = '/css/waline-custom.css';
+        document.head.appendChild(walineCustomCSS);
+        
+        // 加载 Waline JS
+        const walineScript = document.createElement('script');
+        walineScript.type = 'module';
+        walineScript.onload = function() {
+          // 确保 Waline 加载后再初始化
+          import('https://unpkg.com/@waline/client@v3/dist/waline.js').then(({ init }) => {
+            const waline = init({
+              el: '#waline',
+              serverURL: 'https://blog-comment-nine-azure.vercel.app/',
+              lang: 'zh-CN',
+              locale: {},
+              emoji: ["https://unpkg.com/@waline/emojis@1.2.0/weibo","https://unpkg.com/@waline/emojis@1.2.0/alus"],
+              requiredMeta: [],
+              login: 'disable',
+              wordLimit: 0,
+              pageSize: 10,
+              imageUploader: false,
+              highlighter: true,
+              texRenderer: false,
+              search: false,
+              pageview: false,
+              comment: true,
+              copyright: false,
+              
+              // 自动适配主题
+              dark: document.documentElement.getAttribute('data-theme') === 'dark' ? 'auto' : false,
+              
+              // 评论框占位符
+              placeholder: 'Feel free to leave a comment, no login required!',
+              
+              // 元数据配置
+              meta: ['nick', 'mail', 'link'],
+              
+              // 表情配置
+              emojiCDN: 'https://unpkg.com/@waline/emojis@1.2.0/',
+            });
+            
+            // 监听主题变化
+            const observer = new MutationObserver((mutations) => {
+              mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+                  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                  // Waline 会自动处理主题切换
+                  if (waline) {
+                    waline.update({ dark: isDark ? 'auto' : false });
+                  }
+                }
+              });
+            });
+            
+            observer.observe(document.documentElement, {
+              attributes: true,
+              attributeFilter: ['data-theme']
+            });
+          });
+        };
+        walineScript.src = 'https://unpkg.com/@waline/client@v3/dist/waline.js';
+        document.body.appendChild(walineScript);
+      </script>
+    
+    
+  </div>
+
+      </article>
+    </div>
+  </div>
+</div>
+
+    </div>
+    <footer class="footer">
+  <div class="status-bar">
+    <div class="status-item">
+      <i class="fas fa-code-branch"></i>
+      master
+    </div>
+    <div class="status-item">
+      <i class="fas fa-sync"></i>
+      tux298
+    </div>
+    <div class="status-item">
+      <i class="fas fa-clock"></i>
+      2026-03-06
+    </div>
+    <!-- <div class="status-item">
+      <a href="https://github.com/tux298" target="_blank">tux298</a>
+    </div> -->
+    <div class="status-item github">
+      <a href="https://github.com/tux298" target="_blank">
+        <i class="fab fa-github"></i>
+      </a>
+    </div>
+  </div>
+</footer>
+
+    
+    <!-- 全局配置 -->
+    <script>
+      window.HEXO_CONFIG = {
+        language: "en",
+        root: "/",
+        
+        theme_switch: {
+          enabled: false,
+          light_start: "06:00",
+          light_end: "18:00"
+        }
+        
+      };
+
+      // 特定于搜索的配置
+      window.VSC4T_SEARCH = {
+        root: "/"
+      };
+    </script>
+    
+    <script src="//cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/highlight.js@11.7.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <!-- 这里可以放置自定义脚本 -->
+<script>
+document.addEventListener('DOMContentLoaded', (event) => {
+  // Apply smooth scroll to non-TOC anchor links
+  document.querySelectorAll('a[href^="#"]:not(.toc-link)').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      // Check if querySelector is valid before using it
+      try {
+        const targetSelector = this.getAttribute('href');
+        // Basic check for potentially invalid selectors (though not exhaustive)
+        if (targetSelector && targetSelector.length > 1) { 
+          const targetElement = document.querySelector(targetSelector);
+          if (targetElement) {
+            targetElement.scrollIntoView({
+              behavior: 'smooth'
+            });
+          } else {
+            console.warn('Smooth scroll target not found:', targetSelector);
+          }
+        } else {
+           console.warn('Invalid href for smooth scroll:', targetSelector);
+        }
+      } catch (error) {
+        console.error('Error during smooth scroll:', error, 'Selector:', this.getAttribute('href'));
+        // Fallback or alternative behavior if needed
+        // For example, try getElementById if it's just an ID
+        const targetId = this.getAttribute('href').slice(1);
+        try {
+            const targetElementById = document.getElementById(decodeURIComponent(targetId));
+            if (targetElementById) {
+                targetElementById.scrollIntoView({ behavior: 'smooth' });
+            }
+        } catch (idError) {
+             console.error('Fallback getElementById also failed:', idError);
+        }
+      }
+    });
+  });
+});
+</script>
+
+<!-- Scripts -->
+<script>
+  // 将语言文件中的翻译传递给前端
+  window.HEXO_CONFIG = {
+    language: "en",
+    search_placeholder: "Type to search...",
+    search_no_results: "No results found",
+    search_result: "result",
+    search_results: "results",
+    search_results_found: "Found undefined results",
+    search_in: "Search in",
+    search_in_title: "Title",
+    search_in_content: "Content",
+    search_in_tags: "Tags",
+    search_in_categories: "Categories",
+    search_filters: "Search Filters",
+    search_recent: "Recent Searches",
+    search_clear: "Clear",
+    search_loading: "Loading...",
+    search_error: "Error loading search data",
+    // Encryption i18n strings
+    encrypt_badge: "Protected",
+    encrypt_title: "Protected Content",
+    encrypt_description: "Enter the password to unlock this article. The password will be saved locally until you choose to re-encrypt.",
+    encrypt_label: "Password",
+    encrypt_placeholder: "Enter password to unlock",
+    encrypt_button: "Unlock",
+    encrypt_button_loading: "Unlocking...",
+    encrypt_hint: "Press Enter to submit. Password will be remembered on this device.",
+    encrypt_success: "Content unlocked successfully!",
+    encrypt_unlocked_note: "Content unlocked. You can re-encrypt at any time.",
+    encrypt_again: "Re-encrypt",
+    encrypt_wrong_password: "Incorrect password. Please try again.",
+    encrypt_show_password: "Show password",
+    encrypt_hide_password: "Hide password"
+  };
+</script>
+
+
+
+<!-- 添加所有需要的脚本 -->
+<script src="../../../../js/main.js"></script>
+<script src="../../../../js/search.js"></script>
+<script src="../../../../js/theme-switch.js"></script>
+
+<script src="../../../../js/password-protect.js?v=1772779485289"></script>
+
+    <script>
+      // 移动端菜单切换
+      $(document).ready(function() {
+        $('.mobile-menu-toggle').click(function() {
+          $('.sidebar-explorer').toggleClass('show');
+        });
+      });
+    </script>
+  </body>
+</html>
