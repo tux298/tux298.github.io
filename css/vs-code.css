@@ -73,6 +73,14 @@
   cursor: pointer;
 }
 
+.file a {
+  display: inline-block;
+  max-width: 22ch;
+  overflow: hidden;
+  /* text-overflow: ellipsis; */
+  white-space: nowrap;
+}
+
 .folder:hover, .file:hover, .tag-item:hover {
   background: var(--vscode-active);
 }
@@ -227,6 +235,8 @@
   color: var(--vscode-text);
   text-decoration: none;
   flex: 1;
+  font-size: 14px;
+  word-break: normal;
 }
 
 .tag-item:hover a {
