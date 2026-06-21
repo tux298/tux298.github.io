@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>OBS 吸附外挂原理分析——NDI + YOLOv8 实现画面捕捉与目标锁定 | x86devLog</title>
+  
+  <!-- Favicon 配置 -->
+  
+    
+      <link rel="icon" type="image/x-icon" href="../../../../favicon.ico">
+    
+    
+      <link rel="icon" type="image/png" sizes="16x16" href="../../../../favicon-16x16.png">
+    
+    
+      <link rel="icon" type="image/png" sizes="32x32" href="../../../../favicon-32x32.png">
+    
+    
+      <link rel="icon" type="image/png" sizes="192x192" href="../../../../favicon-192x192.png">
+    
+    
+      <link rel="apple-touch-icon" sizes="180x180" href="../../../../apple-touch-icon.png">
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../../../../css/theme-colors.css">
+  <link rel="stylesheet" href="../../../../css/main.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <!-- 添加代码高亮样式 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+  <!-- 添加highlight.js库 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  <!-- 添加mermaid.js库 -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <link rel="stylesheet" href="../../../../css/code.css">
+  <link rel="stylesheet" href="../../../../css/code-custom.css">
+  <link rel="stylesheet" href="../../../../css/code-languages.css">
+  <link rel="stylesheet" href="../../../../css/mermaid.css">
+
+  <link rel="stylesheet" href="../../../../css/vs-code.css">
+  <link rel="stylesheet" href="../../../../css/post.css?v=1782064234136">
+  <link rel="stylesheet" href="../../../../css/tag.css">
+  <link rel="stylesheet" href="../../../../css/categories.css">
+  <link rel="stylesheet" href="../../../../css/archive.css">
+  <link rel="stylesheet" href="../../../../css/search.css">
+  <link rel="stylesheet" href="../../../../css/mobile.css">  <link rel="stylesheet" href="../../../../css/responsive.css">
+  <link rel="stylesheet" href="../../../../css/elements.css">
+
+  <!-- 添加 JetBrains Mono 字体 -->  
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- Add any custom head content here -->
+
+  <script src="../../../../js/explorer.js"></script>
+  <script src="../../../../js/code-copy.js"></script>
+  <script src="../../../../js/code-enhance.js"></script>
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+  <body>
+    <div class="wrapper">
+      <div class="mobile-menu-toggle">
+        <i class="fas fa-bars"></i>
+      </div>
+      <header class="vs-header">
+  <nav class="vs-nav">
+    <div class="nav-left">
+      <a href="/" class="nav-brand">
+        <i class="fas fa-terminal"></i>
+        x86devLog
+      </a>
+    </div>
+    
+    <div class="nav-right">
+      <a href="/" class="nav-item ">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+      </a>
+      <a href="/archives/" class="nav-item ">
+        <i class="fas fa-archive"></i>
+        <span>Archives</span>
+      </a>
+      <a href="/categories/" class="nav-item ">
+        <i class="fas fa-folder"></i>
+        <span>Categories</span>
+      </a>
+      <a href="/tags/" class="nav-item ">
+        <i class="fas fa-tags"></i>
+        <span>Tags</span>
+      </a>
+      <a href="/search/" class="nav-item ">
+        <i class="fas fa-search"></i>
+        <span>Search</span>
+      </a>
+      <a href="/about/" class="nav-item ">
+        <i class="fas fa-info-circle"></i>
+        <span>About</span>
+      </a>
+    </div>
+  </nav>
+</header>
+
+<script>
+  function smoothScroll(event, target) {
+    event.preventDefault();
+    const targetId = target.substring(target.indexOf('#') + 1);
+    const targetElement = document.getElementById(targetId);
+
+    if (targetElement) {
+      window.scrollTo({
+        top: targetElement.offsetTop - 50, // 调整偏移量
+        behavior: 'smooth'
+      });
+    } else {
+      window.location.href = target;
+    }
+  }
+
+  window.addEventListener('scroll', function() {
+    const header = document.querySelector('.vs-header');
+    const nav = document.querySelector('.vs-nav');
+    const scrollPercent = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+    
+    nav.style.setProperty('--scroll-percent', `${scrollPercent}%`);
+    
+    if (window.scrollY > 0) {
+      header.classList.add('scrolled');
+    } else {
+      header.classList.remove('scrolled');
+    }
+  });
+
+  // 添加标签页切换动画
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', function(e) {
+      const ripple = document.createElement('span');
+      ripple.classList.add('nav-ripple');
+      this.appendChild(ripple);
+      
+      const rect = this.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      ripple.style.left = `${x}px`;
+      ripple.style.top = `${y}px`;
+      
+      setTimeout(() => ripple.remove(), 1000);
+    });
+  });
+</script>
+
+
+<div class="vscode-container">
+  <!-- 左侧资源管理器 -->
+  <div class="sidebar-explorer">
+    <!-- TOC导航 -->
+    <div class="explorer-section">
+      <div class="section-header">
+        <i class="fas fa-list"></i>
+        <span>TABLE OF CONTENTS</span>
+      </div>
+      <div class="section-content">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-text">背景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E7%94%A8-OBS%EF%BC%9F"><span class="toc-text">为什么用 OBS？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B4%E4%BD%93%E9%93%BE%E8%B7%AF"><span class="toc-text">整体链路</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0%E6%95%88%E6%9E%9C"><span class="toc-text">实现效果</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E5%AE%9E%E7%8E%B0"><span class="toc-text">核心实现</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E9%80%9A%E8%BF%87-NDI-%E8%8E%B7%E5%8F%96%E6%B8%B8%E6%88%8F%E7%94%BB%E9%9D%A2"><span class="toc-text">1. 通过 NDI 获取游戏画面</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-YOLOv8-%E4%BA%BA%E4%BD%93%E6%A3%80%E6%B5%8B"><span class="toc-text">2. YOLOv8 人体检测</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E7%9B%AE%E6%A0%87%E5%9D%90%E6%A0%87%E6%8F%90%E5%8F%96"><span class="toc-text">3. 目标坐标提取</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E4%B8%BB%E5%BE%AA%E7%8E%AF%E2%80%94%E2%80%94%E6%8C%81%E7%BB%AD%E5%8F%96%E5%B8%A7%E4%B8%8E%E6%8E%A8%E7%90%86"><span class="toc-text">4. 主循环——持续取帧与推理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%BC%A0%E6%A0%87%E5%90%B8%E9%99%84%E2%80%94%E2%80%94%E4%BB%8E%E6%A3%80%E6%B5%8B%E6%A1%86%E5%88%B0%E5%87%86%E6%98%9F%E8%90%BD%E7%82%B9"><span class="toc-text">鼠标吸附——从检测框到准星落点</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%9D%90%E6%A0%87%E6%98%A0%E5%B0%84%E2%80%94%E2%80%94%E7%94%BB%E9%9D%A2%E5%83%8F%E7%B4%A0-%E2%86%92-%E5%B1%8F%E5%B9%95%E5%9D%90%E6%A0%87"><span class="toc-text">1. 坐标映射——画面像素 → 屏幕坐标</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E7%9B%AE%E6%A0%87%E7%AD%9B%E9%80%89%E2%80%94%E2%80%94%E5%A4%9A%E4%B8%AA%E6%A3%80%E6%B5%8B%E7%BB%93%E6%9E%9C%E4%B8%AD%E9%94%81%E8%B0%81%EF%BC%9F"><span class="toc-text">2. 目标筛选——多个检测结果中锁谁？</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AD%96%E7%95%A5-A%EF%BC%9A%E7%A6%BB%E5%87%86%E6%98%9F%E6%9C%80%E8%BF%91%EF%BC%88FOV-%E4%BC%98%E5%85%88%EF%BC%89"><span class="toc-text">策略 A：离准星最近（FOV 优先）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AD%96%E7%95%A5-B%EF%BC%9A%E6%9C%80%E9%AB%98%E7%BD%AE%E4%BF%A1%E5%BA%A6%E4%BC%98%E5%85%88"><span class="toc-text">策略 B：最高置信度优先</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AD%96%E7%95%A5-C%EF%BC%9A%E5%8A%A0%E6%9D%83%E7%BB%BC%E5%90%88%E8%AF%84%E5%88%86%EF%BC%88%E5%AE%9E%E6%88%98%E6%9C%80%E5%B8%B8%E7%94%A8%EF%BC%89"><span class="toc-text">策略 C：加权综合评分（实战最常用）</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E9%BC%A0%E6%A0%87%E7%A7%BB%E5%8A%A8%E2%80%94%E2%80%94%E4%B8%89%E7%A7%8D%E9%A9%B1%E5%8A%A8%E6%96%B9%E5%BC%8F"><span class="toc-text">3. 鼠标移动——三种驱动方式</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%B9%E5%BC%8F-1%EF%BC%9ASendInput%EF%BC%88%E7%94%A8%E6%88%B7%E6%80%81-API%EF%BC%8C%E6%9C%80%E5%B8%B8%E8%A7%81%EF%BC%89"><span class="toc-text">方式 1：SendInput（用户态 API，最常见）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%B9%E5%BC%8F-2%EF%BC%9Amouse-event%EF%BC%88%E8%80%81%E6%97%A7-API%EF%BC%8C%E4%BD%86%E4%BB%8D%E5%8F%AF%E7%94%A8%EF%BC%89"><span class="toc-text">方式 2：mouse_event（老旧 API，但仍可用）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%B9%E5%BC%8F-3%EF%BC%9AKMDF-UMDF-%E9%A9%B1%E5%8A%A8%EF%BC%88%E5%86%85%E6%A0%B8%E7%BA%A7%EF%BC%8C%E9%9A%90%E8%94%BD%E6%80%A7%E6%9C%80%E9%AB%98%EF%BC%89"><span class="toc-text">方式 3：KMDF&#x2F;UMDF 驱动（内核级，隐蔽性最高）</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B9%B3%E6%BB%91%E7%AE%97%E6%B3%95%E2%80%94%E2%80%94%E8%AE%A9%E5%90%B8%E9%99%84%E7%9C%8B%E8%B5%B7%E6%9D%A5%E2%80%9D%E5%83%8F%E4%BA%BA%E2%80%9D"><span class="toc-text">4. 平滑算法——让吸附看起来”像人”</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BA%BF%E6%80%A7%E6%8F%92%E5%80%BC%EF%BC%88Lerp%EF%BC%89%E2%80%94%E2%80%94%E6%9C%80%E5%9F%BA%E7%A1%80%E7%9A%84%E5%B9%B3%E6%BB%91"><span class="toc-text">线性插值（Lerp）——最基础的平滑</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BC%93%E5%8A%A8%E5%87%BD%E6%95%B0%E2%80%94%E2%80%94%E6%A8%A1%E6%8B%9F%E4%BA%BA%E7%B1%BB%E5%8A%A0%E5%87%8F%E9%80%9F"><span class="toc-text">缓动函数——模拟人类加减速</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%B4%9D%E5%A1%9E%E5%B0%94%E6%9B%B2%E7%BA%BF%E2%80%94%E2%80%94%E6%9C%80%E6%8E%A5%E8%BF%91%E4%BA%BA%E7%B1%BB%E6%89%8B%E9%83%A8%E8%BD%A8%E8%BF%B9"><span class="toc-text">贝塞尔曲线——最接近人类手部轨迹</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%99%AA%E7%82%B9%E6%B3%A8%E5%85%A5%E2%80%94%E2%80%94%E5%8F%8D%E8%A1%8C%E4%B8%BA%E7%89%B9%E5%BE%81%E5%88%86%E6%9E%90"><span class="toc-text">噪点注入——反行为特征分析</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-%E5%AE%8C%E6%95%B4%E5%90%B8%E9%99%84%E4%B8%BB%E5%BE%AA%E7%8E%AF"><span class="toc-text">5. 完整吸附主循环</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-%E5%90%B8%E9%99%84%E5%8F%82%E6%95%B0%E6%B1%87%E6%80%BB"><span class="toc-text">6. 吸附参数汇总</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%8D%E4%BD%9C%E5%BC%8A%E8%A7%86%E8%A7%92"><span class="toc-text">反作弊视角</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84"><span class="toc-text">文件结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83"><span class="toc-text">环境</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol>
+      </div>
+    </div>
+    
+    <!-- 同分类文章 -->
+    
+    <div class="explorer-section">
+      <div class="section-header">
+        <i class="fas fa-folder"></i>
+        <span>CATEGORY POSTS</span>
+      </div>
+      <div class="section-content">
+        
+          <div class="file">
+            <i class="fas fa-file-code"></i>
+            <a href="../LCUAPI/">LoLSearch —— 基于 LCU API 的隐藏战绩查询工具</a>
+          </div>
+        
+          <div class="file">
+            <i class="fas fa-file-code"></i>
+            <a href="../../06/CVE-2026-42945/">CVE-2026-42945 本地复现</a>
+          </div>
+        
+          <div class="file">
+            <i class="fas fa-file-code"></i>
+            <a href="../../../03/08/AmeSpider/">爬虫案例 AME 期刊网站：反爬策略、并发下载与工程化实现</a>
+          </div>
+        
+          <div class="file">
+            <i class="fas fa-file-code"></i>
+            <a href="../../../03/06/GutAndLiver/">使用 Python 自动化下载 Gut and Liver 期刊 PDF</a>
+          </div>
+        
+      </div>
+    </div>
+    
+    
+    <!-- 标签列表 -->
+    
+    <div class="explorer-section">
+      <div class="section-header">
+        <i class="fas fa-tags"></i>
+        <span>ARTICLE TAGS</span>
+      </div>
+      <div class="section-content">
+        
+          <div class="tag-item">
+            <i class="fas fa-tag"></i>
+            <a href="../../../../tags/OBS/">OBS</a>
+            <span class="count">(1)</span>
+          </div>
+        
+          <div class="tag-item">
+            <i class="fas fa-tag"></i>
+            <a href="../../../../tags/YOLO/">YOLO</a>
+            <span class="count">(1)</span>
+          </div>
+        
+      </div>
+    </div>
+    
+  </div>
+
+  <!-- 主要内容区域 -->
+  <div class="editor-content">
+    <div class="tab-bar">
+      <div class="tab active">
+        <i class="fas fa-file-alt"></i>
+        <span>OBS 吸附外挂原理分析——NDI + YOLOv8 实现画面捕捉与目标锁定.md</span>
+      </div>
+    </div>
+    
+    <div class="content-area">
+      <article class="post-content">
+        <div class="post-header">
+          <h1>OBS 吸附外挂原理分析——NDI + YOLOv8 实现画面捕捉与目标锁定</h1>
+          <div class="post-meta">
+            <span class="date">
+              <i class="fas fa-calendar-alt"></i>
+              2026-06-22
+            </span>            
+              <span class="categories">
+                <i class="fas fa-folder"></i>
+                <div class="categories-list">
+                  <ul class="category-item-post-list"><li class="category-item-post-list-item"><a class="category-item-post-list-link" href="../../../../categories/python/">python</a></li></ul>
+                </div>
+              </span>
+            
+            
+              <span class="tags">
+                <i class="fas fa-tags"></i>
+                <div class="tags-list">
+                  <ul class="tag-item-post-list" itemprop="keywords"><li class="tag-item-post-list-item"><a class="tag-item-post-list-link" href="../../../../tags/OBS/" rel="tag">OBS</a></li><li class="tag-item-post-list-item"><a class="tag-item-post-list-link" href="../../../../tags/YOLO/" rel="tag">YOLO</a></li></ul>
+                </div>
+              </span>
+            
+          </div>
+        </div>
+        
+        <div class="post-body vscode-markdown">
+          <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>近期出现了一类被称为 <strong>“OBS 吸附”</strong> 的游戏外挂方案。与传统外挂通过注入游戏进程、Hook DirectX&#x2F;OpenGL 来获取画面不同，这类外挂的取景手段极为特殊——它利用 <strong>OBS（Open Broadcaster Software）</strong> 的 <strong>NDI 输出</strong>功能获取游戏画面，再用 <strong>YOLOv8</strong> 目标检测模型识别屏幕中的敌人位置，最终驱动鼠标”吸附”到目标身上，实现自瞄效果。</p>
+<p>本文从技术原理角度拆解这一方案，还原其核心链路，旨在帮助理解此类外挂的运作方式，为反作弊研究提供参考。</p>
+<h2 id="为什么用-OBS？"><a href="#为什么用-OBS？" class="headerlink" title="为什么用 OBS？"></a>为什么用 OBS？</h2><p>传统屏幕捕获方式（如 <code>BitBlt</code>、<code>DXGI Screen Capture</code>）在多数反作弊系统中已有特征标记。而 OBS 本身是合法的直播软件，拥有广泛的驱动白名单和数字签名，其 NDI 输出通道不会触发常规的反作弊检测。</p>
+<table>
+<thead>
+<tr>
+<th>取景方式</th>
+<th>被检测风险</th>
+<th>延迟</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>进程注入 Hook</td>
+<td>⚠️ 极高</td>
+<td>极低</td>
+<td>主流反作弊重点盯防</td>
+</tr>
+<tr>
+<td>DXGI&#x2F;DirectX 截屏</td>
+<td>⚠️ 高</td>
+<td>低</td>
+<td>行为特征已被部分反作弊收录</td>
+</tr>
+<tr>
+<td>BitBlt GDI 截屏</td>
+<td>⚠️ 中</td>
+<td>中</td>
+<td>部分反作弊检测 GDI 调用链</td>
+</tr>
+<tr>
+<td><strong>OBS NDI 输出</strong></td>
+<td>✅ 低</td>
+<td>低</td>
+<td>合法软件行为，难以区分</td>
+</tr>
+</tbody></table>
+<h2 id="整体链路"><a href="#整体链路" class="headerlink" title="整体链路"></a>整体链路</h2><figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs stylus">┌──────────┐    NDI/IP     ┌──────────────┐    坐标/置信度    ┌──────────────┐<br>│   游戏    │ ──OBS采集──→ │  <span class="hljs-selector-tag">main</span><span class="hljs-selector-class">.py</span>     │ ───────────────→ │  鼠标控制模块  │<br>│  画面    │   NDI推流     │ YOLOv8 推理  │   目标位置数据    │  (吸附/自瞄)  │<br>└──────────┘               └──────────────┘                  └──────────────┘<br></code></pre></td></tr></table></figure>
+
+<h2 id="实现效果"><a href="#实现效果" class="headerlink" title="实现效果"></a>实现效果</h2><p><img src="img1.jpg"><br><img src="img2.jpg"></p>
+<h2 id="核心实现"><a href="#核心实现" class="headerlink" title="核心实现"></a>核心实现</h2><h3 id="1-通过-NDI-获取游戏画面"><a href="#1-通过-NDI-获取游戏画面" class="headerlink" title="1. 通过 NDI 获取游戏画面"></a>1. 通过 NDI 获取游戏画面</h3><p>NDI 是 NewTek 开发的低延迟视频 over IP 协议。OBS 安装 NDI 插件后可将采集的画面以 NDI 流形式推送到局域网。外挂端只需作为 NDI 接收方拿取画面即可：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> NDIlib <span class="hljs-keyword">as</span> ndi<br><br>ndi.initialize()<br><br><span class="hljs-comment"># 扫描局域网 NDI 源</span><br>find = ndi.find_create_v2()<br>ndi.find_wait_for_sources(find, <span class="hljs-number">2000</span>)<br>sources = ndi.find_get_current_sources(find)<br><span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;发现的 NDI 源:&quot;</span>, [s.ndi_name <span class="hljs-keyword">for</span> s <span class="hljs-keyword">in</span> sources])<br><br><span class="hljs-comment"># 连接第一个源</span><br>recv_create = ndi.RecvCreateV3()<br>recv_create.color_format = ndi.RECV_COLOR_FORMAT_BGRX_BGRA<br>recv = ndi.recv_create_v3(recv_create)<br>ndi.recv_connect(recv, sources[<span class="hljs-number">0</span>])<br></code></pre></td></tr></table></figure>
+
+<p><strong>关键细节：</strong></p>
+<ul>
+<li><code>find_wait_for_sources</code> 超时 2000ms，防止扫描不到源时卡死。</li>
+<li>颜色格式 <code>BGRX_BGRA</code> → 4 通道 BGRA，匹配 OpenCV 的数据布局，后续需要 <code>cvtColor</code> 转为 3 通道 BGR 送模型推理。</li>
+</ul>
+<h3 id="2-YOLOv8-人体检测"><a href="#2-YOLOv8-人体检测" class="headerlink" title="2. YOLOv8 人体检测"></a>2. YOLOv8 人体检测</h3><p>本文仅为测试，直接用 COCO 预训练的 YOLOv8：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> ultralytics <span class="hljs-keyword">import</span> YOLO<br><br>model = YOLO(<span class="hljs-string">&quot;yolov8n.pt&quot;</span>)   <span class="hljs-comment"># nano 版本，极致速度</span><br>PERSON_CLASS_ID = <span class="hljs-number">0</span>           <span class="hljs-comment"># COCO 中 person 的类别 ID</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>为什么选 yolov8n？</strong> 外挂场景对帧率极度敏感——每多 10ms 延迟意味着少一次瞄准更新。nano 版本仅 6.5MB，在普通 GPU 上单帧推理约 5-10ms，是实时自瞄的唯一可行选择。</p>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>推理耗时 (GPU)</th>
+<th>自瞄可用性</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>yolov8n</strong></td>
+<td>~5-10ms</td>
+<td>✅ 流畅</td>
+</tr>
+<tr>
+<td>yolov8s</td>
+<td>~10-20ms</td>
+<td>⚠️ 可接受</td>
+</tr>
+<tr>
+<td>yolov8m+</td>
+<td>&gt;30ms</td>
+<td>❌ 延迟过高</td>
+</tr>
+</tbody></table>
+<h3 id="3-目标坐标提取"><a href="#3-目标坐标提取" class="headerlink" title="3. 目标坐标提取"></a>3. 目标坐标提取</h3><p>检测结果中每个 box 都包含目标的边界框坐标 <code>(x1, y1, x2, y2)</code>——这就是吸附锁敌的核心数据。外挂通常会取<strong>置信度最高</strong>的目标或<strong>离准星最近</strong>的目标作为锁敌对象：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">analyze</span>(<span class="hljs-params">frame</span>):<br>    results = model(<br>        frame,<br>        classes=[PERSON_CLASS_ID],  <span class="hljs-comment"># 只检测人，过滤掉 79 个无关类别</span><br>        conf=<span class="hljs-number">0.4</span>,                   <span class="hljs-comment"># 置信度阈值——太低误锁背景，太高漏检</span><br>        verbose=<span class="hljs-literal">False</span>               <span class="hljs-comment"># 抑制每帧日志，减少终端 I/O 开销</span><br>    )[<span class="hljs-number">0</span>]<br><br>    <span class="hljs-keyword">for</span> box <span class="hljs-keyword">in</span> results.boxes:<br>        x1, y1, x2, y2 = <span class="hljs-built_in">map</span>(<span class="hljs-built_in">int</span>, box.xyxy[<span class="hljs-number">0</span>])<br>        conf = <span class="hljs-built_in">float</span>(box.conf[<span class="hljs-number">0</span>])<br><br>        <span class="hljs-comment"># 计算目标中心点——这是&quot;吸附&quot;的落点</span><br>        cx, cy = (x1 + x2) // <span class="hljs-number">2</span>, (y1 + y2) // <span class="hljs-number">2</span><br><br>        <span class="hljs-comment"># 绘制检测框（调试可视化）</span><br>        cv2.rectangle(frame, (x1, y1), (x2, y2), (<span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>), <span class="hljs-number">2</span>)<br>        label = <span class="hljs-string">f&quot;person <span class="hljs-subst">&#123;conf:<span class="hljs-number">.2</span>f&#125;</span>&quot;</span><br>        cv2.putText(frame, label, (x1, y1 - <span class="hljs-number">8</span>),<br>                    cv2.FONT_HERSHEY_SIMPLEX, <span class="hljs-number">0.6</span>, (<span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>), <span class="hljs-number">2</span>)<br><br>    count = <span class="hljs-built_in">len</span>(results.boxes)<br>    cv2.putText(frame, <span class="hljs-string">f&quot;count: <span class="hljs-subst">&#123;count&#125;</span>&quot;</span>, (<span class="hljs-number">12</span>, <span class="hljs-number">32</span>),<br>                cv2.FONT_HERSHEY_SIMPLEX, <span class="hljs-number">1.0</span>, (<span class="hljs-number">0</span>, <span class="hljs-number">200</span>, <span class="hljs-number">255</span>), <span class="hljs-number">2</span>)<br></code></pre></td></tr></table></figure>
+
+<p><strong>参数调优是反检测的关键：</strong></p>
+<ul>
+<li><code>conf=0.4</code> — 置信度阈值需要根据游戏画面精细调节。过低会增加误检（把地图装饰识别为人），过高则漏检率高。</li>
+<li><code>classes=[0]</code> — 严格限定只检测 <code>person</code>。如果不过滤，YOLO 还会检测鼠标、键盘、杯子等无意义的 79 个类别，徒增开销。</li>
+<li><code>verbose=False</code> — 减少不必要的终端输出，降低 CPU 占用痕迹。</li>
+</ul>
+<h3 id="4-主循环——持续取帧与推理"><a href="#4-主循环——持续取帧与推理" class="headerlink" title="4. 主循环——持续取帧与推理"></a>4. 主循环——持续取帧与推理</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">while</span> <span class="hljs-literal">True</span>:<br>    frame_type, video_frame, _, _ = ndi.recv_capture_v2(recv, timeout_in_ms=<span class="hljs-number">1000</span>)<br><br>    <span class="hljs-keyword">if</span> frame_type == ndi.FRAME_TYPE_VIDEO:<br>        frame = np.copy(video_frame.data)<br>        h, w = video_frame.yres, video_frame.xres<br>        frame = frame.reshape((h, w, <span class="hljs-number">4</span>))<br>        frame_bgr = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)<br><br>        analyze(frame_bgr)<br><br>        ndi.recv_free_video_v2(recv, video_frame)  <span class="hljs-comment"># 释放 NDI 缓冲区，防止内存泄漏</span><br><br>    <span class="hljs-keyword">if</span> cv2.waitKey(<span class="hljs-number">1</span>) == <span class="hljs-number">27</span>:  <span class="hljs-comment"># ESC 键退出</span><br>        <span class="hljs-keyword">break</span><br><br><span class="hljs-comment"># 顺序释放资源</span><br>ndi.recv_destroy(recv)<br>ndi.find_destroy(find)<br>ndi.destroy()<br></code></pre></td></tr></table></figure>
+
+<p><strong>资源管理要点：</strong></p>
+<ul>
+<li>每帧必须调用 <code>recv_free_video_v2</code> 释放 NDI 内部缓冲区，否则数分钟内内存就会撑爆。</li>
+<li>退出时严格按 <code>recv → find → ndi</code> 顺序销毁，逆序可能导致悬挂指针。</li>
+</ul>
+<h2 id="鼠标吸附——从检测框到准星落点"><a href="#鼠标吸附——从检测框到准星落点" class="headerlink" title="鼠标吸附——从检测框到准星落点"></a>鼠标吸附——从检测框到准星落点</h2><p>检测出目标坐标后，剩下的关键一步是将像素坐标转化为鼠标移动指令，驱动准星”吸附”到目标身上。下面逐步拆解这一环节的完整实现。</p>
+<h3 id="1-坐标映射——画面像素-→-屏幕坐标"><a href="#1-坐标映射——画面像素-→-屏幕坐标" class="headerlink" title="1. 坐标映射——画面像素 → 屏幕坐标"></a>1. 坐标映射——画面像素 → 屏幕坐标</h3><p>YOLO 返回的 <code>(x1, y1, x2, y2)</code> 是相对于 NDI 视频帧的像素坐标，而鼠标操作的是屏幕绝对坐标系。两者之间需要一次映射变换：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> ctypes<br><span class="hljs-keyword">from</span> ctypes <span class="hljs-keyword">import</span> wintypes<br><br><span class="hljs-comment"># ── 获取屏幕与窗口几何信息 ──</span><br><br>user32 = ctypes.windll.user32<br>SCREEN_W = user32.GetSystemMetrics(<span class="hljs-number">0</span>)   <span class="hljs-comment"># 主显示器宽度</span><br>SCREEN_H = user32.GetSystemMetrics(<span class="hljs-number">1</span>)   <span class="hljs-comment"># 主显示器高度</span><br><br><span class="hljs-comment"># 游戏窗口的实际位置与大小（通过 FindWindow + GetWindowRect 获取）</span><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">get_window_rect</span>(<span class="hljs-params">window_title</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;获取目标窗口的屏幕坐标位置&quot;&quot;&quot;</span><br>    hwnd = user32.FindWindowW(<span class="hljs-literal">None</span>, window_title)<br>    <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> hwnd:<br>        <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span><br>    rect = wintypes.RECT()<br>    user32.GetWindowRect(hwnd, ctypes.byref(rect))<br>    <span class="hljs-keyword">return</span> rect.left, rect.top, rect.right, rect.bottom<br><br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">pixel_to_screen</span>(<span class="hljs-params">cx, cy, win_rect</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    将检测框中心点 (cx, cy) 从画面内像素坐标</span><br><span class="hljs-string">    映射为屏幕绝对坐标</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    win_left, win_top, win_right, win_bottom = win_rect<br>    win_w = win_right - win_left<br>    win_h = win_bottom - win_top<br><br>    <span class="hljs-comment"># 比例映射：画面坐标 / 画面尺寸 = 屏幕坐标偏移 / 窗口尺寸</span><br>    screen_x = win_left + (cx / FRAME_W) * win_w<br>    screen_y = win_top  + (cy / FRAME_H) * win_h<br><br>    <span class="hljs-keyword">return</span> <span class="hljs-built_in">int</span>(screen_x), <span class="hljs-built_in">int</span>(screen_y)<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>这里 <code>FRAME_W</code> &#x2F; <code>FRAME_H</code> 是 NDI 视频帧的实际宽高（从 <code>video_frame.xres</code> &#x2F; <code>video_frame.yres</code> 获取）。</p>
+</blockquote>
+<p><strong>实际场景中需要注意：</strong> 如果 OBS 采集的画面经过了裁剪&#x2F;缩放（例如游戏是 1920×1080 但 OBS 输出 1280×720），映射比例需要以 NDI 帧的实际分辨率为准，而非游戏的渲染分辨率。</p>
+<h3 id="2-目标筛选——多个检测结果中锁谁？"><a href="#2-目标筛选——多个检测结果中锁谁？" class="headerlink" title="2. 目标筛选——多个检测结果中锁谁？"></a>2. 目标筛选——多个检测结果中锁谁？</h3><p>一帧画面中可能检测到多个目标（多名敌人）。外挂需要一套策略从中选出唯一锁敌对象。以下是三种常见算法：</p>
+<h4 id="策略-A：离准星最近（FOV-优先）"><a href="#策略-A：离准星最近（FOV-优先）" class="headerlink" title="策略 A：离准星最近（FOV 优先）"></a>策略 A：离准星最近（FOV 优先）</h4><p>最符合直觉的策略——锁离屏幕中心（准星）最近的目标，模拟人类”先看到最近的威胁”：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> math<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">select_closest_to_crosshair</span>(<span class="hljs-params">targets, frame_w, frame_h</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    targets: [(cx, cy, conf), ...] 每个目标的中心点坐标与置信度</span><br><span class="hljs-string">    返回: 离画面中心最近的目标</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    cx_screen, cy_screen = frame_w // <span class="hljs-number">2</span>, frame_h // <span class="hljs-number">2</span>  <span class="hljs-comment"># 准星在画面正中心</span><br><br>    best_target = <span class="hljs-literal">None</span><br>    best_dist = <span class="hljs-built_in">float</span>(<span class="hljs-string">&#x27;inf&#x27;</span>)<br><br>    <span class="hljs-keyword">for</span> cx, cy, conf <span class="hljs-keyword">in</span> targets:<br>        dist = math.hypot(cx - cx_screen, cy - cy_screen)<br>        <span class="hljs-keyword">if</span> dist &lt; best_dist:<br>            best_dist = dist<br>            best_target = (cx, cy, conf, dist)<br><br>    <span class="hljs-keyword">return</span> best_target<br></code></pre></td></tr></table></figure>
+
+<h4 id="策略-B：最高置信度优先"><a href="#策略-B：最高置信度优先" class="headerlink" title="策略 B：最高置信度优先"></a>策略 B：最高置信度优先</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">select_highest_confidence</span>(<span class="hljs-params">targets</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;返回置信度最高的目标&quot;&quot;&quot;</span><br>    <span class="hljs-keyword">return</span> <span class="hljs-built_in">max</span>(targets, key=<span class="hljs-keyword">lambda</span> t: t[<span class="hljs-number">2</span>])  <span class="hljs-comment"># t[2] = conf</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="策略-C：加权综合评分（实战最常用）"><a href="#策略-C：加权综合评分（实战最常用）" class="headerlink" title="策略 C：加权综合评分（实战最常用）"></a>策略 C：加权综合评分（实战最常用）</h4><p>单独使用距离或置信度都有缺陷——距离最近的可能只是一个误检，置信度最高的可能在视野边缘。加权评分可以兼顾两者：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">select_weighted</span>(<span class="hljs-params">targets, frame_w, frame_h,</span><br><span class="hljs-params">                    conf_weight=<span class="hljs-number">0.6</span>, dist_weight=<span class="hljs-number">0.4</span></span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    综合置信度和距离的加权评分</span><br><span class="hljs-string">    分数越高越优先被锁定</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    cx_screen, cy_screen = frame_w // <span class="hljs-number">2</span>, frame_h // <span class="hljs-number">2</span><br>    max_dist = math.hypot(frame_w, frame_h)  <span class="hljs-comment"># 最远可能距离（对角线）</span><br><br>    scored = []<br>    <span class="hljs-keyword">for</span> cx, cy, conf <span class="hljs-keyword">in</span> targets:<br>        dist = math.hypot(cx - cx_screen, cy - cy_screen)<br>        <span class="hljs-comment"># 距离归一化到 [0,1]，取反——越近分数越高</span><br>        dist_score = <span class="hljs-number">1.0</span> - (dist / max_dist)<br>        score = conf_weight * conf + dist_weight * dist_score<br>        scored.append((cx, cy, conf, dist, score))<br><br>    <span class="hljs-keyword">return</span> <span class="hljs-built_in">max</span>(scored, key=<span class="hljs-keyword">lambda</span> t: t[<span class="hljs-number">4</span>])<br></code></pre></td></tr></table></figure>
+
+<p><strong>锁敌策略还需要加入防抖逻辑</strong>——如果当前已经锁定了某个目标，不应在每一帧之间来回切换目标（会显得极其不自然）。实现上通常给当前目标加一个”惯性”偏置：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs python">current_target_id = <span class="hljs-literal">None</span>   <span class="hljs-comment"># 上一个锁定的目标的追踪 ID</span><br>SWITCH_THRESHOLD = <span class="hljs-number">0.15</span>    <span class="hljs-comment"># 新目标必须比当前目标高 15% 分才切换</span><br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">select_with_hysteresis</span>(<span class="hljs-params">targets, prev_best_score=<span class="hljs-literal">None</span></span>):<br>    best = select_weighted(targets, FRAME_W, FRAME_H)<br>    <span class="hljs-keyword">if</span> prev_best_score <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:<br>        <span class="hljs-keyword">if</span> best[<span class="hljs-number">4</span>] &lt; prev_best_score * (<span class="hljs-number">1</span> + SWITCH_THRESHOLD):<br>            <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>  <span class="hljs-comment"># 维持当前锁敌，不切换</span><br>    <span class="hljs-keyword">return</span> best<br></code></pre></td></tr></table></figure>
+
+<h3 id="3-鼠标移动——三种驱动方式"><a href="#3-鼠标移动——三种驱动方式" class="headerlink" title="3. 鼠标移动——三种驱动方式"></a>3. 鼠标移动——三种驱动方式</h3><p>获取目标屏幕坐标后，需要让鼠标”移过去”。Windows 下有三种主流方式，按隐蔽性递增：</p>
+<h4 id="方式-1：SendInput（用户态-API，最常见）"><a href="#方式-1：SendInput（用户态-API，最常见）" class="headerlink" title="方式 1：SendInput（用户态 API，最常见）"></a>方式 1：<code>SendInput</code>（用户态 API，最常见）</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> ctypes<br><br><span class="hljs-comment"># Windows SendInput 常量</span><br>INPUT_MOUSE = <span class="hljs-number">0</span><br>MOUSEEVENTF_MOVE = <span class="hljs-number">0x0001</span><br>MOUSEEVENTF_ABSOLUTE = <span class="hljs-number">0x8000</span><br><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">MOUSEINPUT</span>(ctypes.Structure):<br>    _fields_ = [(<span class="hljs-string">&quot;dx&quot;</span>, ctypes.c_long),<br>                (<span class="hljs-string">&quot;dy&quot;</span>, ctypes.c_long),<br>                (<span class="hljs-string">&quot;mouseData&quot;</span>, ctypes.c_ulong),<br>                (<span class="hljs-string">&quot;dwFlags&quot;</span>, ctypes.c_ulong),<br>                (<span class="hljs-string">&quot;time&quot;</span>, ctypes.c_ulong),<br>                (<span class="hljs-string">&quot;dwExtraInfo&quot;</span>, ctypes.POINTER(ctypes.c_ulong))]<br><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">INPUT</span>(ctypes.Structure):<br>    _fields_ = [(<span class="hljs-string">&quot;type&quot;</span>, ctypes.c_ulong),<br>                (<span class="hljs-string">&quot;mi&quot;</span>, MOUSEINPUT)]<br><br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">move_mouse_absolute</span>(<span class="hljs-params">x, y</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    绝对坐标移动鼠标</span><br><span class="hljs-string">    坐标系: [0, 65535] 映射到整个桌面</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    abs_x = <span class="hljs-built_in">int</span>(x * <span class="hljs-number">65535</span> / SCREEN_W)<br>    abs_y = <span class="hljs-built_in">int</span>(y * <span class="hljs-number">65535</span> / SCREEN_H)<br><br>    inp = INPUT()<br>    inp.<span class="hljs-built_in">type</span> = INPUT_MOUSE<br>    inp.mi.dx = abs_x<br>    inp.mi.dy = abs_y<br>    inp.mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE<br><br>    ctypes.windll.user32.SendInput(<span class="hljs-number">1</span>, ctypes.byref(inp), ctypes.sizeof(inp))<br><br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">move_mouse_relative</span>(<span class="hljs-params">dx, dy</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    相对移动——不指定绝对坐标，而是偏移量</span><br><span class="hljs-string">    通常用于平滑移动中的增量步骤</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    inp = INPUT()<br>    inp.<span class="hljs-built_in">type</span> = INPUT_MOUSE<br>    inp.mi.dx = dx<br>    inp.mi.dy = dy<br>    inp.mi.dwFlags = MOUSEEVENTF_MOVE<br><br>    ctypes.windll.user32.SendInput(<span class="hljs-number">1</span>, ctypes.byref(inp), ctypes.sizeof(inp))<br></code></pre></td></tr></table></figure>
+
+<h4 id="方式-2：mouse-event（老旧-API，但仍可用）"><a href="#方式-2：mouse-event（老旧-API，但仍可用）" class="headerlink" title="方式 2：mouse_event（老旧 API，但仍可用）"></a>方式 2：<code>mouse_event</code>（老旧 API，但仍可用）</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># mouse_event 更简单但已被标记为 deprecated</span><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">move_mouse_absolute_legacy</span>(<span class="hljs-params">x, y</span>):<br>    abs_x = <span class="hljs-built_in">int</span>(x * <span class="hljs-number">65535</span> / SCREEN_W)<br>    abs_y = <span class="hljs-built_in">int</span>(y * <span class="hljs-number">65535</span> / SCREEN_H)<br>    ctypes.windll.user32.mouse_event(<br>        MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE,<br>        abs_x, abs_y, <span class="hljs-number">0</span>, <span class="hljs-number">0</span><br>    )<br></code></pre></td></tr></table></figure>
+
+<h4 id="方式-3：KMDF-UMDF-驱动（内核级，隐蔽性最高）"><a href="#方式-3：KMDF-UMDF-驱动（内核级，隐蔽性最高）" class="headerlink" title="方式 3：KMDF&#x2F;UMDF 驱动（内核级，隐蔽性最高）"></a>方式 3：KMDF&#x2F;UMDF 驱动（内核级，隐蔽性最高）</h4><p>通过自定义鼠标过滤驱动直接向鼠标设备栈注入输入报告，绕过 <code>SendInput</code> 的调用链标记。这种方式技术门槛最高，但也是最难被反作弊检测到的。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># 伪代码示意——驱动通信部分</span><br><span class="hljs-comment"># driver.send_mouse_report(dx, dy)  # 直接写入 HID 报告描述符</span><br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>方式</th>
+<th>隐蔽性</th>
+<th>实现难度</th>
+<th>被检测风险</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>SendInput</code></td>
+<td>低</td>
+<td>简单</td>
+<td>调用链可被 Hook 追踪</td>
+</tr>
+<tr>
+<td><code>mouse_event</code></td>
+<td>低</td>
+<td>简单</td>
+<td>API 已被标记，行为特征明显</td>
+</tr>
+<tr>
+<td>驱动注入</td>
+<td>高</td>
+<td>复杂</td>
+<td>需签名驱动，但仍可能被行为分析捕获</td>
+</tr>
+</tbody></table>
+<h3 id="4-平滑算法——让吸附看起来”像人”"><a href="#4-平滑算法——让吸附看起来”像人”" class="headerlink" title="4. 平滑算法——让吸附看起来”像人”"></a>4. 平滑算法——让吸附看起来”像人”</h3><p>如果每帧直接 <code>move_mouse_absolute(target_x, target_y)</code>——准星瞬间跳到敌人头上，行为特征极其明显，大多数反作弊系统都有针对瞬移式鼠标的检测规则。</p>
+<p>平滑移动的核心思路：<strong>将一次长距离移动拆分成多段小步长，逐步逼近目标</strong>。</p>
+<h4 id="线性插值（Lerp）——最基础的平滑"><a href="#线性插值（Lerp）——最基础的平滑" class="headerlink" title="线性插值（Lerp）——最基础的平滑"></a>线性插值（Lerp）——最基础的平滑</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">lerp_move</span>(<span class="hljs-params">current_x, current_y, target_x, target_y, steps=<span class="hljs-number">8</span></span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    线性插值分步移动</span><br><span class="hljs-string">    steps: 分段数，越多越平滑但越慢</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">1</span>, steps + <span class="hljs-number">1</span>):<br>        t = i / steps<br>        interp_x = <span class="hljs-built_in">int</span>(current_x + (target_x - current_x) * t)<br>        interp_y = <span class="hljs-built_in">int</span>(current_y + (target_y - current_y) * t)<br>        move_mouse_absolute(interp_x, interp_y)<br>        time.sleep(<span class="hljs-number">0.001</span>)  <span class="hljs-comment"># 每步间隔 1ms</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="缓动函数——模拟人类加减速"><a href="#缓动函数——模拟人类加减速" class="headerlink" title="缓动函数——模拟人类加减速"></a>缓动函数——模拟人类加减速</h4><p>人类操作鼠标时不会匀速移动——启动慢、中间快、接近目标时减速微调。这对应缓动函数中的 <strong>ease-in-out</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">ease_in_out_cubic</span>(<span class="hljs-params">t</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;三次方缓入缓出曲线&quot;&quot;&quot;</span><br>    <span class="hljs-keyword">if</span> t &lt; <span class="hljs-number">0.5</span>:<br>        <span class="hljs-keyword">return</span> <span class="hljs-number">4</span> * t * t * t<br>    <span class="hljs-keyword">else</span>:<br>        <span class="hljs-keyword">return</span> <span class="hljs-number">1</span> - <span class="hljs-built_in">pow</span>(-<span class="hljs-number">2</span> * t + <span class="hljs-number">2</span>, <span class="hljs-number">3</span>) / <span class="hljs-number">2</span><br><br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">eased_move</span>(<span class="hljs-params">current_x, current_y, target_x, target_y,</span><br><span class="hljs-params">               steps=<span class="hljs-number">12</span>, ease_func=ease_in_out_cubic</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    带缓动函数的鼠标移动</span><br><span class="hljs-string">    - 前 30% 步数：缓慢加速（模拟人识别目标）</span><br><span class="hljs-string">    - 中间 40%：快速移动</span><br><span class="hljs-string">    - 后 30%：减速微调（模拟人精确瞄准）</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">1</span>, steps + <span class="hljs-number">1</span>):<br>        raw_t = i / steps<br>        eased_t = ease_func(raw_t)<br><br>        interp_x = <span class="hljs-built_in">int</span>(current_x + (target_x - current_x) * eased_t)<br>        interp_y = <span class="hljs-built_in">int</span>(current_y + (target_y - current_y) * eased_t)<br>        move_mouse_absolute(interp_x, interp_y)<br><br>        <span class="hljs-comment"># 动态步长间隔——人体神经反应延迟约 2-8ms</span><br>        time.sleep(random.uniform(<span class="hljs-number">0.002</span>, <span class="hljs-number">0.006</span>))<br></code></pre></td></tr></table></figure>
+
+<h4 id="贝塞尔曲线——最接近人类手部轨迹"><a href="#贝塞尔曲线——最接近人类手部轨迹" class="headerlink" title="贝塞尔曲线——最接近人类手部轨迹"></a>贝塞尔曲线——最接近人类手部轨迹</h4><p>人类手腕移动鼠标时，轨迹通常是一条微弧线而非严格直线。贝塞尔曲线可以模拟这种自然弯曲：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">bezier_move</span>(<span class="hljs-params">current_x, current_y, target_x, target_y, steps=<span class="hljs-number">12</span></span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    三次贝塞尔曲线移动</span><br><span class="hljs-string">    引入随机控制点，模拟手部自然弧线轨迹</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    <span class="hljs-comment"># 随机生成两个控制点，使路径轻微弯曲</span><br>    cp1_x = current_x + random.randint(-<span class="hljs-number">80</span>, <span class="hljs-number">80</span>)<br>    cp1_y = current_y + random.randint(-<span class="hljs-number">60</span>, <span class="hljs-number">60</span>)<br>    cp2_x = target_x  + random.randint(-<span class="hljs-number">40</span>, <span class="hljs-number">40</span>)<br>    cp2_y = target_y  + random.randint(-<span class="hljs-number">40</span>, <span class="hljs-number">40</span>)<br><br>    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">1</span>, steps + <span class="hljs-number">1</span>):<br>        t = i / steps<br><br>        <span class="hljs-comment"># 三次贝塞尔公式: B(t) = (1-t)³P0 + 3(1-t)²tP1 + 3(1-t)t²P2 + t³P3</span><br>        mt  = <span class="hljs-number">1</span> - t<br>        mt2 = mt * mt<br>        mt3 = mt2 * mt<br>        t2  = t * t<br>        t3  = t2 * t<br><br>        x = <span class="hljs-built_in">int</span>(mt3 * current_x + <span class="hljs-number">3</span> * mt2 * t * cp1_x + <span class="hljs-number">3</span> * mt * t2 * cp2_x + t3 * target_x)<br>        y = <span class="hljs-built_in">int</span>(mt3 * current_y + <span class="hljs-number">3</span> * mt2 * t * cp1_y + <span class="hljs-number">3</span> * mt * t2 * cp2_y + t3 * target_y)<br><br>        move_mouse_absolute(x, y)<br>        time.sleep(random.uniform(<span class="hljs-number">0.001</span>, <span class="hljs-number">0.004</span>))<br></code></pre></td></tr></table></figure>
+
+<h4 id="噪点注入——反行为特征分析"><a href="#噪点注入——反行为特征分析" class="headerlink" title="噪点注入——反行为特征分析"></a>噪点注入——反行为特征分析</h4><p>即使使用了贝塞尔曲线 + 缓动函数，如果每帧的轨迹参数完全一致，仍然可以被统计模型识别。加入随机扰动是关键：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">humanized_move</span>(<span class="hljs-params">current_x, current_y, target_x, target_y</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    综合人性化移动：</span><br><span class="hljs-string">    - 贝塞尔曲线路径</span><br><span class="hljs-string">    - 缓入缓出速度</span><br><span class="hljs-string">    - 每步随机延迟</span><br><span class="hljs-string">    - 落点加微小随机偏移（±3px），避免每次锁同一个像素</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    <span class="hljs-comment"># 落点偏移——真人不可能两次锁到同一像素</span><br>    offset_x = random.randint(-<span class="hljs-number">3</span>, <span class="hljs-number">3</span>)<br>    offset_y = random.randint(-<span class="hljs-number">3</span>, <span class="hljs-number">3</span>)<br>    final_x = target_x + offset_x<br>    final_y = target_y + offset_y<br><br>    <span class="hljs-comment"># 步数随机化</span><br>    dist = math.hypot(final_x - current_x, final_y - current_y)<br>    steps = <span class="hljs-built_in">max</span>(<span class="hljs-number">6</span>, <span class="hljs-built_in">int</span>(dist / random.uniform(<span class="hljs-number">25</span>, <span class="hljs-number">45</span>)))  <span class="hljs-comment"># 每 25-45px 一步</span><br><br>    <span class="hljs-comment"># 控制点随机化</span><br>    cp1_x = current_x + random.randint(-<span class="hljs-number">60</span>, <span class="hljs-number">60</span>)<br>    cp1_y = current_y + random.randint(-<span class="hljs-number">50</span>, <span class="hljs-number">50</span>)<br>    cp2_x = final_x + random.randint(-<span class="hljs-number">30</span>, <span class="hljs-number">30</span>)<br>    cp2_y = final_y + random.randint(-<span class="hljs-number">30</span>, <span class="hljs-number">30</span>)<br><br>    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">1</span>, steps + <span class="hljs-number">1</span>):<br>        t = i / steps<br>        eased_t = ease_in_out_cubic(t)<br><br>        mt  = <span class="hljs-number">1</span> - eased_t<br>        mt2 = mt * mt<br>        mt3 = mt2 * mt<br>        t2  = eased_t * eased_t<br>        t3  = t2 * eased_t<br><br>        x = <span class="hljs-built_in">int</span>(mt3 * current_x + <span class="hljs-number">3</span> * mt2 * eased_t * cp1_x + <span class="hljs-number">3</span> * mt * t2 * cp2_x + t3 * final_x)<br>        y = <span class="hljs-built_in">int</span>(mt3 * current_y + <span class="hljs-number">3</span> * mt2 * eased_t * cp1_y + <span class="hljs-number">3</span> * mt * t2 * cp2_y + t3 * final_y)<br><br>        move_mouse_absolute(x, y)<br>        time.sleep(random.uniform(<span class="hljs-number">0.001</span>, <span class="hljs-number">0.005</span>))  <span class="hljs-comment"># 1-5ms 随机间隔</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="5-完整吸附主循环"><a href="#5-完整吸附主循环" class="headerlink" title="5. 完整吸附主循环"></a>5. 完整吸附主循环</h3><p>将以上模块整合到主循环中，形成从”取帧 → 检测 → 选目标 → 鼠标平滑移动”的完整链路：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> random<br><span class="hljs-keyword">import</span> time<br><span class="hljs-keyword">import</span> math<br><span class="hljs-keyword">import</span> ctypes<br><span class="hljs-keyword">from</span> ctypes <span class="hljs-keyword">import</span> wintypes<br><br><span class="hljs-comment"># ── 初始化 ──</span><br>user32 = ctypes.windll.user32<br>SCREEN_W = user32.GetSystemMetrics(<span class="hljs-number">0</span>)<br>SCREEN_H = user32.GetSystemMetrics(<span class="hljs-number">1</span>)<br><br><span class="hljs-comment"># 吸附开关与锁敌状态</span><br>aimbot_enabled = <span class="hljs-literal">True</span><br>current_target = <span class="hljs-literal">None</span>       <span class="hljs-comment"># 当前锁定的目标 (cx, cy, conf)</span><br>prev_score = <span class="hljs-literal">None</span>           <span class="hljs-comment"># 上一帧的加权得分</span><br><br><span class="hljs-comment"># 吸附触发区域（FOV 圈）：只锁准星周围半径内的目标</span><br>AIM_FOV_RADIUS = <span class="hljs-number">300</span>        <span class="hljs-comment"># 像素，超出此范围不锁敌</span><br><br>FRAME_W, FRAME_H = <span class="hljs-number">1920</span>, <span class="hljs-number">1080</span>  <span class="hljs-comment"># 根据实际 NDI 帧分辨率调整</span><br><br><br><span class="hljs-keyword">while</span> <span class="hljs-literal">True</span>:<br>    frame_type, video_frame, _, _ = ndi.recv_capture_v2(recv, timeout_in_ms=<span class="hljs-number">1000</span>)<br><br>    <span class="hljs-keyword">if</span> frame_type != ndi.FRAME_TYPE_VIDEO:<br>        <span class="hljs-keyword">continue</span><br><br>    <span class="hljs-comment"># ── 1. 取帧 &amp; 推理 ──</span><br>    frame = np.copy(video_frame.data)<br>    h, w = video_frame.yres, video_frame.xres<br>    FRAME_W, FRAME_H = w, h<br>    frame = frame.reshape((h, w, <span class="hljs-number">4</span>))<br>    frame_bgr = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)<br><br>    results = model(frame_bgr, classes=[<span class="hljs-number">0</span>], conf=<span class="hljs-number">0.4</span>, verbose=<span class="hljs-literal">False</span>)[<span class="hljs-number">0</span>]<br><br>    <span class="hljs-comment"># ── 2. 提取目标坐标 ──</span><br>    targets = []<br>    <span class="hljs-keyword">for</span> box <span class="hljs-keyword">in</span> results.boxes:<br>        x1, y1, x2, y2 = <span class="hljs-built_in">map</span>(<span class="hljs-built_in">int</span>, box.xyxy[<span class="hljs-number">0</span>])<br>        conf = <span class="hljs-built_in">float</span>(box.conf[<span class="hljs-number">0</span>])<br>        cx, cy = (x1 + x2) // <span class="hljs-number">2</span>, (y1 + y2) // <span class="hljs-number">2</span><br><br>        <span class="hljs-comment"># FOV 过滤：只保留准星周围半径内的目标</span><br>        dist_to_crosshair = math.hypot(cx - FRAME_W // <span class="hljs-number">2</span>, cy - FRAME_H // <span class="hljs-number">2</span>)<br>        <span class="hljs-keyword">if</span> dist_to_crosshair &lt;= AIM_FOV_RADIUS:<br>            targets.append((cx, cy, conf))<br><br>        <span class="hljs-comment"># 可视化</span><br>        cv2.rectangle(frame_bgr, (x1, y1), (x2, y2), (<span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>), <span class="hljs-number">2</span>)<br>        cv2.putText(frame_bgr, <span class="hljs-string">f&quot;<span class="hljs-subst">&#123;conf:<span class="hljs-number">.2</span>f&#125;</span>&quot;</span>, (x1, y1 - <span class="hljs-number">8</span>),<br>                    cv2.FONT_HERSHEY_SIMPLEX, <span class="hljs-number">0.5</span>, (<span class="hljs-number">0</span>, <span class="hljs-number">255</span>, <span class="hljs-number">0</span>), <span class="hljs-number">1</span>)<br><br>    <span class="hljs-comment"># ── 3. 目标筛选 ──</span><br>    <span class="hljs-keyword">if</span> targets <span class="hljs-keyword">and</span> aimbot_enabled:<br>        <span class="hljs-comment"># 加权评分选目标</span><br>        selected = select_weighted(targets, FRAME_W, FRAME_H)<br><br>        <span class="hljs-comment"># 惯性防抖——不完全跟随目标切换</span><br>        <span class="hljs-keyword">if</span> current_target <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:<br>            current_target = selected<br>            prev_score = selected[<span class="hljs-number">4</span>]<br>        <span class="hljs-keyword">else</span>:<br>            <span class="hljs-keyword">if</span> selected[<span class="hljs-number">4</span>] &gt; prev_score * (<span class="hljs-number">1</span> + SWITCH_THRESHOLD):<br>                current_target = selected<br>                prev_score = selected[<span class="hljs-number">4</span>]<br>    <span class="hljs-keyword">else</span>:<br>        current_target = <span class="hljs-literal">None</span><br>        prev_score = <span class="hljs-literal">None</span><br><br>    <span class="hljs-comment"># ── 4. 鼠标吸附 ──</span><br>    <span class="hljs-keyword">if</span> current_target <span class="hljs-keyword">and</span> aimbot_enabled:<br>        cx, cy, conf, dist, score = current_target<br><br>        <span class="hljs-comment"># 映射到屏幕绝对坐标</span><br>        screen_x, screen_y = pixel_to_screen(cx, cy, win_rect)<br><br>        <span class="hljs-comment"># 获取当前鼠标位置</span><br>        cursor = wintypes.POINT()<br>        user32.GetCursorPos(ctypes.byref(cursor))<br><br>        <span class="hljs-comment"># 如果距离目标超过阈值（防止原地抽搐微调）</span><br>        <span class="hljs-keyword">if</span> math.hypot(screen_x - cursor.x, screen_y - cursor.y) &gt; <span class="hljs-number">2</span>:<br>            humanized_move(cursor.x, cursor.y, screen_x, screen_y)<br><br>    <span class="hljs-comment"># 状态显示</span><br>    <span class="hljs-keyword">if</span> current_target:<br>        cv2.putText(frame_bgr, <span class="hljs-string">f&quot;LOCKED: (<span class="hljs-subst">&#123;current_target[<span class="hljs-number">0</span>]&#125;</span>,<span class="hljs-subst">&#123;current_target[<span class="hljs-number">1</span>]&#125;</span>)&quot;</span>,<br>                    (<span class="hljs-number">12</span>, <span class="hljs-number">64</span>), cv2.FONT_HERSHEY_SIMPLEX, <span class="hljs-number">0.6</span>, (<span class="hljs-number">0</span>, <span class="hljs-number">200</span>, <span class="hljs-number">255</span>), <span class="hljs-number">1</span>)<br>    cv2.putText(frame_bgr, <span class="hljs-string">f&quot;targets: <span class="hljs-subst">&#123;<span class="hljs-built_in">len</span>(targets)&#125;</span> | aim: <span class="hljs-subst">&#123;<span class="hljs-string">&#x27;ON&#x27;</span> <span class="hljs-keyword">if</span> aimbot_enabled <span class="hljs-keyword">else</span> <span class="hljs-string">&#x27;OFF&#x27;</span>&#125;</span>&quot;</span>,<br>                (<span class="hljs-number">12</span>, <span class="hljs-number">32</span>), cv2.FONT_HERSHEY_SIMPLEX, <span class="hljs-number">0.8</span>, (<span class="hljs-number">0</span>, <span class="hljs-number">200</span>, <span class="hljs-number">255</span>), <span class="hljs-number">2</span>)<br><br>    cv2.imshow(<span class="hljs-string">&quot;NDI + YOLO&quot;</span>, frame_bgr)<br><br>    ndi.recv_free_video_v2(recv, video_frame)<br><br>    <span class="hljs-comment"># ── 5. 热键控制 ──</span><br>    key = cv2.waitKey(<span class="hljs-number">1</span>) &amp; <span class="hljs-number">0xFF</span><br>    <span class="hljs-keyword">if</span> key == <span class="hljs-number">27</span>:    <span class="hljs-comment"># ESC: 退出</span><br>        <span class="hljs-keyword">break</span><br>    <span class="hljs-keyword">elif</span> key == <span class="hljs-built_in">ord</span>(<span class="hljs-string">&#x27;f&#x27;</span>):          <span class="hljs-comment"># F 键: 切换吸附开关</span><br>        aimbot_enabled = <span class="hljs-keyword">not</span> aimbot_enabled<br>        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> aimbot_enabled:<br>            current_target = <span class="hljs-literal">None</span><br>        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;[*] Aimbot: <span class="hljs-subst">&#123;<span class="hljs-string">&#x27;ON&#x27;</span> <span class="hljs-keyword">if</span> aimbot_enabled <span class="hljs-keyword">else</span> <span class="hljs-string">&#x27;OFF&#x27;</span>&#125;</span>&quot;</span>)<br>    <span class="hljs-keyword">elif</span> key == <span class="hljs-built_in">ord</span>(<span class="hljs-string">&#x27;r&#x27;</span>):          <span class="hljs-comment"># R 键: 重选目标</span><br>        current_target = <span class="hljs-literal">None</span><br>        prev_score = <span class="hljs-literal">None</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="6-吸附参数汇总"><a href="#6-吸附参数汇总" class="headerlink" title="6. 吸附参数汇总"></a>6. 吸附参数汇总</h3><p>完整的吸附模块涉及多个可调参数，每个都直接影响”像人程度”和被检测风险：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>推荐值</th>
+<th>作用</th>
+<th>调高后果</th>
+<th>调低后果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>AIM_FOV_RADIUS</code></td>
+<td>200-400px</td>
+<td>锁敌触发范围</td>
+<td>锁到视野边缘目标，行为不自然</td>
+<td>贴脸才锁，实用性下降</td>
+</tr>
+<tr>
+<td><code>steps</code>（平滑步数）</td>
+<td>8-16</td>
+<td>移动分段数</td>
+<td>移动太慢，目标已走远</td>
+<td>轨迹太”硬”，像机器</td>
+</tr>
+<tr>
+<td><code>step_delay</code></td>
+<td>1-5ms</td>
+<td>步间延迟</td>
+<td>移动太慢</td>
+<td>移动太快，无人类反应痕迹</td>
+</tr>
+<tr>
+<td><code>SWITCH_THRESHOLD</code></td>
+<td>0.15</td>
+<td>目标切换惯性</td>
+<td>死锁一个目标不放</td>
+<td>来回跳锁，极其可疑</td>
+</tr>
+<tr>
+<td><code>offset_range</code></td>
+<td>±3px</td>
+<td>落点随机偏移</td>
+<td>锁到目标外的背景</td>
+<td>次次锁同一像素，特征明显</td>
+</tr>
+<tr>
+<td><code>conf</code>（置信度）</td>
+<td>0.4-0.6</td>
+<td>检测阈值</td>
+<td>漏检多——敌人打不到</td>
+<td>误检多——对着空气锁</td>
+</tr>
+</tbody></table>
+<h2 id="反作弊视角"><a href="#反作弊视角" class="headerlink" title="反作弊视角"></a>反作弊视角</h2><p>理解此类外挂的运作方式有助于制定对应的检测策略：</p>
+<table>
+<thead>
+<tr>
+<th>检测维度</th>
+<th>可能的手段</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>NDI 流量特征</td>
+<td>监控本地 NDI 收发——普通用户极少在游戏同时使用 NDI</td>
+</tr>
+<tr>
+<td>桌面 OBS</td>
+<td>检测游戏运行时 OBS 是否开启了 NDI 输出</td>
+</tr>
+<tr>
+<td>行为分析</td>
+<td>“吸附”操作产生的鼠标轨迹模式与人类输入有统计差异</td>
+</tr>
+<tr>
+<td>进程链</td>
+<td>YOLO&#x2F;PyTorch&#x2F;OpenCV 等 ML 运行时与游戏进程同时存在</td>
+</tr>
+<tr>
+<td>性能痕迹</td>
+<td>持续的 GPU 推理负载会在显卡功耗&#x2F;频率曲线中留下特征</td>
+</tr>
+</tbody></table>
+<h2 id="文件结构"><a href="#文件结构" class="headerlink" title="文件结构"></a>文件结构</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">obs/<br>├── main.py          # 核心脚本：NDI 取流 + YOLOv8 推理 + 可视化<br>├── yolov8n.pt       # YOLOv8 nano 预训练权重（约 6.5 MB）<br></code></pre></td></tr></table></figure>
+
+<h2 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">pip install ultralytics opencv-python numpy<br></code></pre></td></tr></table></figure>
+
+<p>另需安装 <a target="_blank" rel="noopener" href="https://www.ndi.tv/sdk/">NDI SDK</a>，并将 <code>NDIlib</code> Python 绑定置于可导入路径。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>“OBS 吸附”外挂巧妙地利用了 OBS + NDI 这一合法软件组合绕过了常规的截屏检测——反作弊系统难以区分”用户在直播”还是”外挂在取景”。配合 YOLOv8 nano 的轻量推理能力，在 5-10ms 内即可完成一帧的目标检测与坐标提取，为后续的自瞄模块提供高精度定位数据。</p>
+<p>这类方案的检测难点在于：整个链路上的每一个组件单独看都是合法的——OBS 是直播软件、NDI 是视频传输协议、YOLO 是开源视觉模型。真正的突破口在于<strong>组合行为的异常性</strong>：正常用户不会在 FPS 游戏中同时运行 NDI 接收端 + PyTorch 推理。行为链分析或许是未来反作弊的一个重要方向。</p>
+
+        </div>
+        
+        <!-- 文章导航 - 只在同分类有多篇文章时显示 -->
+        
+        
+        
+        <nav class="post-nav">
+          
+            <a class="prev" href="../LCUAPI/">
+              <i class="fas fa-chevron-left"></i>
+              LoLSearch —— 基于 LCU API 的隐藏战绩查询工具
+            </a>
+          
+          
+            <a class="next" href="../../06/CVE-2026-42945/">
+              CVE-2026-42945 本地复现
+              <i class="fas fa-chevron-right"></i>
+            </a>
+          
+        </nav>
+        
+        
+        <!-- 推荐文章 -->
+        
+
+
+<div class="vs-recommended-posts">
+  <div class="vs-recommended-header">
+    <div class="section-header">
+      <i class="fas fa-lightbulb"></i>
+      <span>RELATED POSTS</span>
+    </div>
+  </div>
+  
+  <div class="vs-recommended-grid">
+    
+      <div class="vs-recommended-item" data-index="0" tabindex="0">
+        <a href="../LCUAPI/" class="vs-recommended-link">
+          <!-- 文章信息 -->
+          <div class="vs-recommended-content">
+            <div class="vs-recommended-title">
+              <i class="fas fa-file-code"></i>
+              <span>LoLSearch —— 基于 LCU API 的隐藏战绩查询工具</span>
+            </div>
+            
+            <div class="vs-recommended-excerpt">
+              项目概述LoLSearch 是一个能够查询英雄联盟任意玩家隐藏战绩的 Web 应用。当玩家在 League 客户端中将生涯设为”隐藏”后，OP.GG、U.GG 等第三方网站将无法获取其战绩——而 LoLSearch 利用 LCU（Leagu...
+            </div>
+            
+            <div class="vs-recommended-meta">
+              
+              
+              
+                <span class="vs-tags-preview">
+                  <i class="fas fa-tags"></i>
+                  python, LCU API, FastAPI
+                  
+                </span>
+              
+              
+              <span class="vs-meta-info">
+                <span class="vs-date">
+                  <i class="fas fa-calendar-alt"></i>
+                  Jun 22
+                </span>
+                <span class="vs-reading-time">
+                  <i class="fas fa-clock"></i>
+                  6 min
+                </span>
+              </span>
+            </div>
+          </div>
+        </a>
+      </div>
+    
+      <div class="vs-recommended-item" data-index="1" tabindex="0">
+        <a href="../../06/CVE-2026-42945/" class="vs-recommended-link">
+          <!-- 文章信息 -->
+          <div class="vs-recommended-content">
+            <div class="vs-recommended-title">
+              <i class="fas fa-file-code"></i>
+              <span>CVE-2026-42945 本地复现</span>
+            </div>
+            
+            <div class="vs-recommended-excerpt">
+              CVE-2026-42945 本地复现1. 复现目标本报告用于在本地隔离环境中复现仓库 README 描述的 CVE-2026-42945 &amp;#x2F; NGINX Rift 行为。目标是把 env/Dockerfile、env/nginx...
+            </div>
+            
+            <div class="vs-recommended-meta">
+              
+              
+              
+                <span class="vs-tags-preview">
+                  <i class="fas fa-tags"></i>
+                  python
+                  
+                </span>
+              
+              
+              <span class="vs-meta-info">
+                <span class="vs-date">
+                  <i class="fas fa-calendar-alt"></i>
+                  Jun 06
+                </span>
+                <span class="vs-reading-time">
+                  <i class="fas fa-clock"></i>
+                  6 min
+                </span>
+              </span>
+            </div>
+          </div>
+        </a>
+      </div>
+    
+      <div class="vs-recommended-item" data-index="2" tabindex="0">
+        <a href="../../../03/06/GutAndLiver/" class="vs-recommended-link">
+          <!-- 文章信息 -->
+          <div class="vs-recommended-content">
+            <div class="vs-recommended-title">
+              <i class="fas fa-file-code"></i>
+              <span>使用 Python 自动化下载 Gut and Liver 期刊 PDF</span>
+            </div>
+            
+            <div class="vs-recommended-excerpt">
+              使用 Python 自动化下载 Gut and Liver 期刊 PDF最近我写了一个 Python 爬虫，自动抓取并下载 Gut and Liver 期刊的文章 PDF，并将信息保存到 CSV 文件中。这里总结一下核心代码结构和分析。 核...
+            </div>
+            
+            <div class="vs-recommended-meta">
+              
+              
+              
+                <span class="vs-tags-preview">
+                  <i class="fas fa-tags"></i>
+                  python, 爬虫, 自动化
+                  
+                </span>
+              
+              
+              <span class="vs-meta-info">
+                <span class="vs-date">
+                  <i class="fas fa-calendar-alt"></i>
+                  Mar 06
+                </span>
+                <span class="vs-reading-time">
+                  <i class="fas fa-clock"></i>
+                  2 min
+                </span>
+              </span>
+            </div>
+          </div>
+        </a>
+      </div>
+    
+      <div class="vs-recommended-item" data-index="3" tabindex="0">
+        <a href="../../../03/08/AmeSpider/" class="vs-recommended-link">
+          <!-- 文章信息 -->
+          <div class="vs-recommended-content">
+            <div class="vs-recommended-title">
+              <i class="fas fa-file-code"></i>
+              <span>爬虫案例 AME 期刊网站：反爬策略、并发下载与工程化实现</span>
+            </div>
+            
+            <div class="vs-recommended-excerpt">
+              AME 学术期刊爬虫：Python 多线程数据采集实战解析引言在学术研究中，批量下载期刊文章并提取元数据是一项常见需求。本文将深入解析一个专门针对 AME 出版社旗下期刊 Translational Gastroenterology and...
+            </div>
+            
+            <div class="vs-recommended-meta">
+              
+              
+              
+                <span class="vs-tags-preview">
+                  <i class="fas fa-tags"></i>
+                  python, 爬虫, 自动化
+                  
+                </span>
+              
+              
+              <span class="vs-meta-info">
+                <span class="vs-date">
+                  <i class="fas fa-calendar-alt"></i>
+                  Mar 08
+                </span>
+                <span class="vs-reading-time">
+                  <i class="fas fa-clock"></i>
+                  4 min
+                </span>
+              </span>
+            </div>
+          </div>
+        </a>
+      </div>
+    
+      <div class="vs-recommended-item" data-index="4" tabindex="0">
+        <a href="../../../02/25/Mineflayer-Bot/" class="vs-recommended-link">
+          <!-- 文章信息 -->
+          <div class="vs-recommended-content">
+            <div class="vs-recommended-title">
+              <i class="fas fa-file-code"></i>
+              <span>使用 Node.js 和 Mineflayer 构建全自动 Minecraft 挖矿机器人</span>
+            </div>
+            
+            <div class="vs-recommended-excerpt">
+              在 Minecraft 服务器中，挖矿往往是一项重复且耗时的工作。本文将介绍如何使用 Node.js 和 Mineflayer 库开发一个自动挖矿机器人（Bot）。这个机器人不仅能够自动寻找并挖掘珍贵矿物，还支持聊天指令控制、自动寻路回家以...
+            </div>
+            
+            <div class="vs-recommended-meta">
+              
+              
+              
+                <span class="vs-tags-preview">
+                  <i class="fas fa-tags"></i>
+                  自动化, Node.js
+                  
+                </span>
+              
+              
+              <span class="vs-meta-info">
+                <span class="vs-date">
+                  <i class="fas fa-calendar-alt"></i>
+                  Feb 25
+                </span>
+                <span class="vs-reading-time">
+                  <i class="fas fa-clock"></i>
+                  3 min
+                </span>
+              </span>
+            </div>
+          </div>
+        </a>
+      </div>
+    
+      <div class="vs-recommended-item" data-index="5" tabindex="0">
+        <a href="../../../../2025/12/30/knapsack-object2/" class="vs-recommended-link">
+          <!-- 文章信息 -->
+          <div class="vs-recommended-content">
+            <div class="vs-recommended-title">
+              <i class="fas fa-file-code"></i>
+              <span>背包数据分析2</span>
+            </div>
+            
+            <div class="vs-recommended-excerpt">
+              针对武林外传背包的数据分析2 首先找到背包对象文本来源 123456789101112131415161718192021222324252627004D9B01 | 50 | push eax | eax:L&amp;quot;^ff6000&amp;q...
+            </div>
+            
+            <div class="vs-recommended-meta">
+              
+              
+              
+                <span class="vs-tags-preview">
+                  <i class="fas fa-tags"></i>
+                  asm, 逆向
+                  
+                </span>
+              
+              
+              <span class="vs-meta-info">
+                <span class="vs-date">
+                  <i class="fas fa-calendar-alt"></i>
+                  Dec 30
+                </span>
+                <span class="vs-reading-time">
+                  <i class="fas fa-clock"></i>
+                  3 min
+                </span>
+              </span>
+            </div>
+          </div>
+        </a>
+      </div>
+    
+  </div>
+  
+  <!-- 查看更多 -->
+  <div class="vs-recommended-footer">
+    <a href="../../../../archives/" class="vs-view-more">
+      <i class="fas fa-folder-open"></i>
+      <span>View More Posts</span>
+      <i class="fas fa-chevron-right"></i>
+    </a>
+  </div>
+</div>
+
+<script>
+// 键盘导航支持
+document.addEventListener('DOMContentLoaded', function() {
+  const items = document.querySelectorAll('.vs-recommended-item');
+  let currentIndex = -1;
+  
+  // 键盘事件
+  document.addEventListener('keydown', function(e) {
+    if (!items.length) return;
+    
+    if (e.key === 'Tab') {
+      // Tab键导航由浏览器处理
+      return;
+    }
+    
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      
+      // 移除当前高亮
+      if (currentIndex >= 0) {
+        items[currentIndex].classList.remove('vs-focused');
+      }
+      
+      // 更新索引
+      if (e.key === 'ArrowRight') {
+        currentIndex = (currentIndex + 1) % items.length;
+      } else {
+        currentIndex = currentIndex <= 0 ? items.length - 1 : currentIndex - 1;
+      }
+      
+      // 添加新高亮
+      items[currentIndex].classList.add('vs-focused');
+      items[currentIndex].focus();
+    }
+    
+    if (e.key === 'Enter' && currentIndex >= 0) {
+      const link = items[currentIndex].querySelector('a');
+      if (link) link.click();
+    }
+  });
+  
+  // 鼠标悬停时更新当前索引
+  items.forEach((item, index) => {
+    item.addEventListener('mouseenter', function() {
+      currentIndex = index;
+      items.forEach(i => i.classList.remove('vs-focused'));
+      item.classList.add('vs-focused');
+    });
+  });
+});
+</script>
+
+        
+        <!-- 评论区 -->
+        
+  <div class="vs-comments-section">
+    <div class="section-header">
+      <i class="fas fa-comments"></i>
+      <span>COMMENTS</span>
+    </div>
+    
+    
+      <!-- Waline 评论系统 -->
+      <div id="waline"></div>
+      <script>
+        // 加载 Waline CSS
+        const walineCSS = document.createElement('link');
+        walineCSS.rel = 'stylesheet';
+        walineCSS.href = 'https://unpkg.com/@waline/client@v3/dist/waline.css';
+        document.head.appendChild(walineCSS);
+
+        const walineCustomCSS = document.createElement('link');
+        walineCustomCSS.rel = 'stylesheet';
+        walineCustomCSS.href = '/css/waline-custom.css';
+        document.head.appendChild(walineCustomCSS);
+        
+        // 加载 Waline JS
+        const walineScript = document.createElement('script');
+        walineScript.type = 'module';
+        walineScript.onload = function() {
+          // 确保 Waline 加载后再初始化
+          import('https://unpkg.com/@waline/client@v3/dist/waline.js').then(({ init }) => {
+            const waline = init({
+              el: '#waline',
+              serverURL: 'https://blog-comment-nine-azure.vercel.app/',
+              lang: 'zh-CN',
+              locale: {},
+              emoji: ["https://unpkg.com/@waline/emojis@1.2.0/weibo","https://unpkg.com/@waline/emojis@1.2.0/alus"],
+              requiredMeta: [],
+              login: 'disable',
+              wordLimit: 0,
+              pageSize: 10,
+              imageUploader: false,
+              highlighter: true,
+              texRenderer: false,
+              search: false,
+              pageview: false,
+              comment: true,
+              copyright: false,
+              
+              // 自动适配主题
+              dark: document.documentElement.getAttribute('data-theme') === 'dark' ? 'auto' : false,
+              
+              // 评论框占位符
+              placeholder: 'Feel free to leave a comment, no login required!',
+              
+              // 元数据配置
+              meta: ['nick', 'mail', 'link'],
+              
+              // 表情配置
+              emojiCDN: 'https://unpkg.com/@waline/emojis@1.2.0/',
+            });
+            
+            // 监听主题变化
+            const observer = new MutationObserver((mutations) => {
+              mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+                  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                  // Waline 会自动处理主题切换
+                  if (waline) {
+                    waline.update({ dark: isDark ? 'auto' : false });
+                  }
+                }
+              });
+            });
+            
+            observer.observe(document.documentElement, {
+              attributes: true,
+              attributeFilter: ['data-theme']
+            });
+          });
+        };
+        walineScript.src = 'https://unpkg.com/@waline/client@v3/dist/waline.js';
+        document.body.appendChild(walineScript);
+      </script>
+    
+    
+  </div>
+
+      </article>
+    </div>
+  </div>
+</div>
+
+    </div>
+    <footer class="footer">
+  <div class="status-bar">
+    <div class="status-item">
+      <i class="fas fa-code-branch"></i>
+      master
+    </div>
+    <div class="status-item">
+      <i class="fas fa-sync"></i>
+      tux298
+    </div>
+    <div class="status-item">
+      <i class="fas fa-clock"></i>
+      2026-06-22
+    </div>
+    <!-- <div class="status-item">
+      <a href="https://github.com/tux298" target="_blank">tux298</a>
+    </div> -->
+    <div class="status-item github">
+      <a href="https://github.com/tux298" target="_blank">
+        <i class="fab fa-github"></i>
+      </a>
+    </div>
+  </div>
+</footer>
+
+
+      <!-- 全局配置 -->
+      <script>
+        window.HEXO_CONFIG = {
+          language: "en",
+          root: "/",
+        
+          theme_switch: {
+            enabled: false,
+              light_start: "06:00",
+                light_end: "18:00"
+          }
+        
+      };
+
+        // 特定于搜索的配置
+        window.VSC4T_SEARCH = {
+          root: "/"
+        };
+      </script>
+
+      <script src="//cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/highlight.js@11.7.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script>
+      <!-- 这里可以放置自定义脚本 -->
+<script>
+document.addEventListener('DOMContentLoaded', (event) => {
+  // Apply smooth scroll to non-TOC anchor links
+  document.querySelectorAll('a[href^="#"]:not(.toc-link)').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      // Check if querySelector is valid before using it
+      try {
+        const targetSelector = this.getAttribute('href');
+        // Basic check for potentially invalid selectors (though not exhaustive)
+        if (targetSelector && targetSelector.length > 1) { 
+          const targetElement = document.querySelector(targetSelector);
+          if (targetElement) {
+            targetElement.scrollIntoView({
+              behavior: 'smooth'
+            });
+          } else {
+            console.warn('Smooth scroll target not found:', targetSelector);
+          }
+        } else {
+           console.warn('Invalid href for smooth scroll:', targetSelector);
+        }
+      } catch (error) {
+        console.error('Error during smooth scroll:', error, 'Selector:', this.getAttribute('href'));
+        // Fallback or alternative behavior if needed
+        // For example, try getElementById if it's just an ID
+        const targetId = this.getAttribute('href').slice(1);
+        try {
+            const targetElementById = document.getElementById(decodeURIComponent(targetId));
+            if (targetElementById) {
+                targetElementById.scrollIntoView({ behavior: 'smooth' });
+            }
+        } catch (idError) {
+             console.error('Fallback getElementById also failed:', idError);
+        }
+      }
+    });
+  });
+});
+</script>
+
+<!-- Scripts -->
+<script>
+  // 将语言文件中的翻译传递给前端
+  window.HEXO_CONFIG = {
+    language: "en",
+    search_placeholder: "Type to search...",
+    search_no_results: "No results found",
+    search_result: "result",
+    search_results: "results",
+    search_results_found: "Found undefined results",
+    search_in: "Search in",
+    search_in_title: "Title",
+    search_in_content: "Content",
+    search_in_tags: "Tags",
+    search_in_categories: "Categories",
+    search_filters: "Search Filters",
+    search_recent: "Recent Searches",
+    search_clear: "Clear",
+    search_loading: "Loading...",
+    search_error: "Error loading search data",
+    // Encryption i18n strings
+    encrypt_badge: "Protected",
+    encrypt_title: "Protected Content",
+    encrypt_description: "Enter the password to unlock this article. The password will be saved locally until you choose to re-encrypt.",
+    encrypt_label: "Password",
+    encrypt_placeholder: "Enter password to unlock",
+    encrypt_button: "Unlock",
+    encrypt_button_loading: "Unlocking...",
+    encrypt_hint: "Press Enter to submit. Password will be remembered on this device.",
+    encrypt_success: "Content unlocked successfully!",
+    encrypt_unlocked_note: "Content unlocked. You can re-encrypt at any time.",
+    encrypt_again: "Re-encrypt",
+    encrypt_wrong_password: "Incorrect password. Please try again.",
+    encrypt_show_password: "Show password",
+    encrypt_hide_password: "Hide password"
+  };
+</script>
+
+
+
+<!-- 添加所有需要的脚本 -->
+<script src="../../../../js/main.js"></script>
+<script src="../../../../js/search.js"></script>
+<script src="../../../../js/theme-switch.js"></script>
+
+<script src="../../../../js/password-protect.js?v=1782064234136"></script>
+
+        <script>
+          // 移动端菜单切换
+          $(document).ready(function () {
+            $('.mobile-menu-toggle').click(function () {
+              $('.sidebar-explorer').toggleClass('show');
+            });
+          });
+        </script>
+  </body>
+
+</html>
