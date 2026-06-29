@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>使用 Python 自动化下载 Gut and Liver 期刊 PDF | x86devLog</title>
+  <title>基于 Sitemap 的 Nature 期刊爬虫项目总结 | x86devLog</title>
   
   <!-- Favicon 配置 -->
   
@@ -40,7 +40,7 @@
   <link rel="stylesheet" href="../../../../css/mermaid.css">
 
   <link rel="stylesheet" href="../../../../css/vs-code.css">
-  <link rel="stylesheet" href="../../../../css/post.css?v=1782774698374">
+  <link rel="stylesheet" href="../../../../css/post.css?v=1782774698372">
   <link rel="stylesheet" href="../../../../css/tag.css">
   <link rel="stylesheet" href="../../../../css/categories.css">
   <link rel="stylesheet" href="../../../../css/archive.css">
@@ -162,7 +162,7 @@
         <span>TABLE OF CONTENTS</span>
       </div>
       <div class="section-content">
-        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8-Python-%E8%87%AA%E5%8A%A8%E5%8C%96%E4%B8%8B%E8%BD%BD-Gut-and-Liver-%E6%9C%9F%E5%88%8A-PDF"><span class="toc-text">使用 Python 自动化下载 Gut and Liver 期刊 PDF</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E5%8A%9F%E8%83%BD%E6%A8%A1%E5%9D%97"><span class="toc-text">核心功能模块</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E9%85%8D%E7%BD%AE%E8%AF%B7%E6%B1%82%E5%A4%B4%E5%92%8C-CSV-%E6%96%87%E4%BB%B6%E9%94%81"><span class="toc-text">1. 配置请求头和 CSV 文件锁</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E8%8E%B7%E5%8F%96%E5%B9%B4%E4%BB%BD%E5%92%8C%E6%9C%9F%E5%8F%B7%E4%BF%A1%E6%81%AF"><span class="toc-text">2. 获取年份和期号信息</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E6%9E%84%E9%80%A0%E6%96%87%E7%AB%A0%E5%88%97%E8%A1%A8%E9%A1%B5%E8%AF%B7%E6%B1%82%E5%8F%82%E6%95%B0"><span class="toc-text">3. 构造文章列表页请求参数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E4%B8%8B%E8%BD%BD-PDF-%E5%B9%B6%E8%AE%A1%E7%AE%97-MD5"><span class="toc-text">4. 下载 PDF 并计算 MD5</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-%E5%A4%84%E7%90%86%E6%AF%8F%E7%AF%87%E6%96%87%E7%AB%A0%E4%BF%A1%E6%81%AF"><span class="toc-text">5. 处理每篇文章信息</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%8A%93%E5%8F%96%E6%89%80%E6%9C%89%E6%96%87%E7%AB%A0"><span class="toc-text">6. 多线程抓取所有文章</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93%E4%B8%8E%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="toc-text">总结与注意事项</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%8C%E6%95%B4%E8%BF%90%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="toc-text">完整运行流程</span></a></li></ol></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A1%B9%E7%9B%AE%E7%9B%AE%E6%A0%87"><span class="toc-text">项目目标</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F"><span class="toc-text">使用方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BE%9D%E8%B5%96%E4%B8%8E%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83"><span class="toc-text">依赖与运行环境</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B4%E4%BD%93%E6%B5%81%E7%A8%8B"><span class="toc-text">整体流程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Sitemap-%E5%8F%91%E7%8E%B0%E6%9C%BA%E5%88%B6"><span class="toc-text">Sitemap 发现机制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%83%E6%95%B0%E6%8D%AE%E6%8F%90%E5%8F%96"><span class="toc-text">元数据提取</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#PDF-%E4%B8%8B%E8%BD%BD%E4%B8%8E%E5%8E%BB%E9%87%8D"><span class="toc-text">PDF 下载与去重</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CSV-%E8%BE%93%E5%87%BA"><span class="toc-text">CSV 输出</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B9%B6%E5%8F%91%E6%A8%A1%E5%9E%8B"><span class="toc-text">并发模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%AD%E7%82%B9%E7%BB%AD%E7%88%AC"><span class="toc-text">断点续爬</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%8D%E7%88%AC%E4%B8%8E%E8%AE%BF%E9%97%AE%E9%99%90%E5%88%B6%E5%A4%84%E7%90%86"><span class="toc-text">反爬与访问限制处理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A1%B9%E7%9B%AE%E4%BC%98%E7%82%B9"><span class="toc-text">项目优点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%AF%E4%BB%A5%E6%94%B9%E8%BF%9B%E7%9A%84%E5%9C%B0%E6%96%B9"><span class="toc-text">可以改进的地方</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol>
       </div>
     </div>
     
@@ -177,32 +177,32 @@
         
           <div class="file">
             <i class="fas fa-file-code"></i>
-            <a href="../../../06/30/oxford-oup-spider-bypass-summary/">Oxford Academic 爬虫与 Cloudflare Bypass 逻辑复盘</a>
+            <a href="../oxford-oup-spider-bypass-summary/">Oxford Academic 爬虫与 Cloudflare Bypass 逻辑复盘</a>
           </div>
         
           <div class="file">
             <i class="fas fa-file-code"></i>
-            <a href="../../../06/30/nature-spider-summary/">基于 Sitemap 的 Nature 期刊爬虫项目总结</a>
+            <a href="../../22/LCUAPI/">LoLSearch —— 基于 LCU API 的隐藏战绩查询工具</a>
           </div>
         
           <div class="file">
             <i class="fas fa-file-code"></i>
-            <a href="../../../06/22/LCUAPI/">LoLSearch —— 基于 LCU API 的隐藏战绩查询工具</a>
+            <a href="../../22/obs-vision-ndi-yolo/">OBS 吸附外挂原理分析——NDI + YOLOv8 实现画面捕捉与目标锁定</a>
           </div>
         
           <div class="file">
             <i class="fas fa-file-code"></i>
-            <a href="../../../06/22/obs-vision-ndi-yolo/">OBS 吸附外挂原理分析——NDI + YOLOv8 实现画面捕捉与目标锁定</a>
+            <a href="../../06/CVE-2026-42945/">CVE-2026-42945 本地复现</a>
           </div>
         
           <div class="file">
             <i class="fas fa-file-code"></i>
-            <a href="../../../06/06/CVE-2026-42945/">CVE-2026-42945 本地复现</a>
+            <a href="../../../03/08/AmeSpider/">爬虫案例 AME 期刊网站：反爬策略、并发下载与工程化实现</a>
           </div>
         
           <div class="file">
             <i class="fas fa-file-code"></i>
-            <a href="../../08/AmeSpider/">爬虫案例 AME 期刊网站：反爬策略、并发下载与工程化实现</a>
+            <a href="../../../03/06/GutAndLiver/">使用 Python 自动化下载 Gut and Liver 期刊 PDF</a>
           </div>
         
       </div>
@@ -246,18 +246,18 @@
     <div class="tab-bar">
       <div class="tab active">
         <i class="fas fa-file-alt"></i>
-        <span>使用 Python 自动化下载 Gut and Liver 期刊 PDF.md</span>
+        <span>基于 Sitemap 的 Nature 期刊爬虫项目总结.md</span>
       </div>
     </div>
     
     <div class="content-area">
       <article class="post-content">
         <div class="post-header">
-          <h1>使用 Python 自动化下载 Gut and Liver 期刊 PDF</h1>
+          <h1>基于 Sitemap 的 Nature 期刊爬虫项目总结</h1>
           <div class="post-meta">
             <span class="date">
               <i class="fas fa-calendar-alt"></i>
-              2026-03-06
+              2026-06-30
             </span>            
               <span class="categories">
                 <i class="fas fa-folder"></i>
@@ -278,64 +278,133 @@
         </div>
         
         <div class="post-body vscode-markdown">
-          <h1 id="使用-Python-自动化下载-Gut-and-Liver-期刊-PDF"><a href="#使用-Python-自动化下载-Gut-and-Liver-期刊-PDF" class="headerlink" title="使用 Python 自动化下载 Gut and Liver 期刊 PDF"></a>使用 Python 自动化下载 Gut and Liver 期刊 PDF</h1><p>最近我写了一个 Python 爬虫，自动抓取并下载 <a target="_blank" rel="noopener" href="https://www.gutnliver.org/journal/archives.html">Gut and Liver</a> 期刊的文章 PDF，并将信息保存到 CSV 文件中。这里总结一下核心代码结构和分析。</p>
-<h2 id="核心功能模块"><a href="#核心功能模块" class="headerlink" title="核心功能模块"></a>核心功能模块</h2><h3 id="1-配置请求头和-CSV-文件锁"><a href="#1-配置请求头和-CSV-文件锁" class="headerlink" title="1. 配置请求头和 CSV 文件锁"></a>1. 配置请求头和 CSV 文件锁</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs python">CSV_FILE = <span class="hljs-string">&#x27;articles.csv&#x27;</span><br>csv_lock = threading.Lock()<br><br>headers = &#123;<br>    <span class="hljs-string">&#x27;Accept&#x27;</span>: <span class="hljs-string">&#x27;text/html,...&#x27;</span>,<br>    <span class="hljs-string">&#x27;User-Agent&#x27;</span>: <span class="hljs-string">&#x27;Mozilla/5.0 ...&#x27;</span>,<br>&#125;<br></code></pre></td></tr></table></figure>
+          <p>这个项目是一个面向 Nature 官网期刊页面的批量文章发现与 PDF 下载脚本。它不从列表页逐页翻页，而是基于 Nature 的 sitemap 结构定位期刊、年份和月份对应的文章 XML，再对文章页提取元数据和 PDF 下载链接，最后把 PDF 与文章信息按期刊、年份、月份归档保存。</p>
+<h2 id="项目目标"><a href="#项目目标" class="headerlink" title="项目目标"></a>项目目标</h2><p>项目的目标是自动化完成以下工作：</p>
+<ol>
+<li>根据期刊短码选择目标 Nature 期刊。</li>
+<li>从 Nature 全站 sitemap 中筛选该期刊指定年份范围内的文章 sitemap。</li>
+<li>从每个月份的文章 sitemap 中发现文章 URL。</li>
+<li>请求文章详情页，提取标题、DOI、日期、作者、文章类别、摘要、PDF 链接等信息。</li>
+<li>下载可访问的 PDF 文件，并按 MD5 命名，避免重复保存。</li>
+<li>将文章元数据写入 CSV，支持中断后继续运行。</li>
+</ol>
+<p>这种方式相比直接爬取页面列表更稳定，因为 sitemap 天然适合做全量 URL 发现，也能更方便地按年份和月份控制范围。</p>
+<h2 id="使用方式"><a href="#使用方式" class="headerlink" title="使用方式"></a>使用方式</h2><p>脚本通过命令行运行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">python nature.py tp<br></code></pre></td></tr></table></figure>
 
-<blockquote>
-<p>为了防止被反爬机制阻拦，我们自定义了 <code>headers</code>，并且使用线程锁 <code>csv_lock</code> 确保多线程写 CSV 时不会冲突。</p>
-</blockquote>
-<hr>
-<h3 id="2-获取年份和期号信息"><a href="#2-获取年份和期号信息" class="headerlink" title="2. 获取年份和期号信息"></a>2. 获取年份和期号信息</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">getAllArrange</span>() -&gt; <span class="hljs-built_in">dict</span>:<br>    allData = &#123;&#125;<br>    response = requests.get(<span class="hljs-string">&#x27;https://www.gutnliver.org/journal/archives.html&#x27;</span>, headers=headers)<br>    soup = BeautifulSoup(response.content, <span class="hljs-string">&#x27;html.parser&#x27;</span>)<br>    tab_years = soup.find_all(<span class="hljs-string">&#x27;div&#x27;</span>, class_=<span class="hljs-string">&#x27;tab-year&#x27;</span>)<br><br>    <span class="hljs-keyword">for</span> year <span class="hljs-keyword">in</span> tab_years:<br>        allData[year[<span class="hljs-string">&#x27;data-year&#x27;</span>]] = [a.get_text().strip() <span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> year.find_all(<span class="hljs-string">&#x27;a&#x27;</span>)]<br>    <span class="hljs-keyword">return</span> allData<br></code></pre></td></tr></table></figure>
+<p>默认年份范围是 <code>2000-2026</code>。也可以指定起止年份：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">python nature.py sc 2010 2025<br>python nature.py tp 2020 2026<br></code></pre></td></tr></table></figure>
 
-<blockquote>
-<p>这个函数抓取每年的文章列表页链接，并存储为字典格式：</p>
-<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs 1c">&#123;<br>  &#x27;<span class="hljs-number">2023</span>&#x27;<span class="hljs-punctuation">:</span> [&#x27;Vol. 17 No. 1&#x27;<span class="hljs-punctuation">,</span> &#x27;Vol. 17 Suppl 1&#x27;<span class="hljs-punctuation">,</span> ...]<span class="hljs-punctuation">,</span><br>  &#x27;<span class="hljs-number">2024</span>&#x27;<span class="hljs-punctuation">:</span> [...]<span class="hljs-punctuation">,</span><br>&#125;<br></code></pre></td></tr></table></figure>
-</blockquote>
-<hr>
-<h3 id="3-构造文章列表页请求参数"><a href="#3-构造文章列表页请求参数" class="headerlink" title="3. 构造文章列表页请求参数"></a>3. 构造文章列表页请求参数</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">constructArticlePageLinks</span>() -&gt; <span class="hljs-built_in">list</span>:<br>    allData = getAllArrange()<br>    allPageTasks = []<br>    pattern = <span class="hljs-string">r&quot;Vol\.\s*(\d+)\s+(No\.|Suppl)\s*(\d+)&quot;</span><br>    listUrl = <span class="hljs-string">&#x27;https://www.gutnliver.org/journal/list.html&#x27;</span><br><br>    <span class="hljs-keyword">for</span> year, data <span class="hljs-keyword">in</span> allData.items():<br>        <span class="hljs-keyword">for</span> d <span class="hljs-keyword">in</span> data:<br>            m = re.search(pattern, d)<br>            vol, issue_type, num = m.group(<span class="hljs-number">1</span>), m.group(<span class="hljs-number">2</span>), m.group(<span class="hljs-number">3</span>)<br>            params = &#123;...&#125;<br>            allPageTasks.append(&#123;<span class="hljs-string">&#x27;url&#x27;</span>: listUrl, <span class="hljs-string">&#x27;headers&#x27;</span>: headers, <span class="hljs-string">&#x27;params&#x27;</span>: params&#125;)<br>    <span class="hljs-keyword">return</span> allPageTasks<br></code></pre></td></tr></table></figure>
-
-<blockquote>
-<p>使用正则提取卷号和期号，并生成请求列表，用于后续抓取文章详细信息。</p>
-</blockquote>
-<hr>
-<h3 id="4-下载-PDF-并计算-MD5"><a href="#4-下载-PDF-并计算-MD5" class="headerlink" title="4. 下载 PDF 并计算 MD5"></a>4. 下载 PDF 并计算 MD5</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">download_pdf</span>(<span class="hljs-params">save_path, info_dict</span>):<br>    md5 = hashlib.md5()<br>    response = requests.get(info_dict[<span class="hljs-string">&#x27;pdf_link&#x27;</span>], headers=headers, stream=<span class="hljs-literal">True</span>)<br>    ...<br>    row[<span class="hljs-string">&#x27;pdf_md5&#x27;</span>] = pdf_md5<br>    parameter_analysis(row)<br></code></pre></td></tr></table></figure>
-
-<blockquote>
-<p>核心点：</p>
+<p>其中第一个参数是期刊短码，例如：</p>
 <ul>
-<li>文件按 MD5 命名，避免重复。</li>
-<li>使用 <code>stream=True</code> 分块写入，减少内存占用。</li>
-<li>下载完成后将信息写入 CSV。</li>
+<li><code>tp</code>：Translational Psychiatry</li>
+<li><code>sc</code>：SPINAL CORD</li>
+<li><code>onc</code>：ONCOGENE</li>
+<li><code>npp</code>：NEUROPSYCHOPHARMACOLOGY</li>
+<li><code>commsmed</code>：Communications Medicine</li>
+<li><code>nri</code>：Nature Reviews Immunology</li>
 </ul>
-</blockquote>
-<hr>
-<h3 id="5-处理每篇文章信息"><a href="#5-处理每篇文章信息" class="headerlink" title="5. 处理每篇文章信息"></a>5. 处理每篇文章信息</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">detailedAnalysis</span>(<span class="hljs-params">article: bs4.element.Tag</span>):<br>    articleTagA = article.find(<span class="hljs-string">&#x27;a&#x27;</span>, class_=<span class="hljs-string">&#x27;review_txt&#x27;</span>)<br>    ...<br>    pdf_link = <span class="hljs-string">&#x27;https://www.gutnliver.org&#x27;</span> + pdf_span.find(<span class="hljs-string">&#x27;a&#x27;</span>)[<span class="hljs-string">&#x27;href&#x27;</span>] <span class="hljs-keyword">if</span> pdf_span <span class="hljs-keyword">else</span> <span class="hljs-string">&#x27;&#x27;</span><br>    process_info(&#123;<br>        <span class="hljs-string">&#x27;title&#x27;</span>: article_title,<br>        <span class="hljs-string">&#x27;date&#x27;</span>: article_date,<br>        <span class="hljs-string">&#x27;author&#x27;</span>: author,<br>        <span class="hljs-string">&#x27;pdf_link&#x27;</span>: pdf_link,<br>        <span class="hljs-string">&#x27;url&#x27;</span>: article_url,<br>        <span class="hljs-string">&#x27;type&#x27;</span>: article_type,<br>        <span class="hljs-string">&#x27;doi&#x27;</span>: doi,<br>        <span class="hljs-string">&#x27;abstract_text&#x27;</span>: abstract_text,<br>    &#125;)<br></code></pre></td></tr></table></figure>
+<p>完整支持列表定义在 <code>nature_list.py</code> 中。</p>
+<h2 id="依赖与运行环境"><a href="#依赖与运行环境" class="headerlink" title="依赖与运行环境"></a>依赖与运行环境</h2><p>项目使用 Python 编写，主要依赖包括：</p>
+<ul>
+<li><code>requests</code>：发送 HTTP 请求，获取 sitemap、文章页面和 PDF 文件。</li>
+<li><code>BeautifulSoup</code>：解析 XML 与 HTML。</li>
+<li><code>lxml</code>：作为 HTML 解析器。</li>
+<li><code>loguru</code>：输出更友好的运行日志。</li>
+<li><code>concurrent.futures</code>：使用线程池并发处理文章。</li>
+</ul>
+<p>可以根据源码中的 import 推断安装命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">pip install requests beautifulsoup4 lxml loguru<br></code></pre></td></tr></table></figure>
 
-<blockquote>
-<p>解析文章标题、作者、日期、摘要、PDF 链接等信息，并调用 <code>process_info</code> 下载 PDF。</p>
-</blockquote>
-<hr>
-<h3 id="6-多线程抓取所有文章"><a href="#6-多线程抓取所有文章" class="headerlink" title="6. 多线程抓取所有文章"></a>6. 多线程抓取所有文章</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">getAllArticleDetails</span>():<br>    thread_tasks = []<br>    <span class="hljs-keyword">with</span> ThreadPoolExecutor(max_workers=<span class="hljs-number">10</span>) <span class="hljs-keyword">as</span> executor:<br>        <span class="hljs-keyword">for</span> task <span class="hljs-keyword">in</span> constructArticlePageLinks():<br>            response = requests.get(**task)<br>            soup = BeautifulSoup(response.content, <span class="hljs-string">&#x27;html.parser&#x27;</span>)<br>            article_list = soup.find(<span class="hljs-string">&#x27;ul&#x27;</span>, class_=<span class="hljs-string">&#x27;article-list&#x27;</span>)<br>            <span class="hljs-keyword">for</span> article_block <span class="hljs-keyword">in</span> article_list.find_all(<span class="hljs-string">&#x27;li&#x27;</span>):<br>                thread_tasks.append(executor.submit(detailedAnalysis, article_block))<br>        <span class="hljs-keyword">for</span> future <span class="hljs-keyword">in</span> as_completed(thread_tasks):<br>            <span class="hljs-keyword">try</span>:<br>                future.result()<br>            <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:<br>                logger.error(e)<br></code></pre></td></tr></table></figure>
+<h2 id="整体流程"><a href="#整体流程" class="headerlink" title="整体流程"></a>整体流程</h2><p>主流程集中在 <code>nature.py</code> 的 <code>main()</code> 函数中，大致可以分成六步。</p>
+<p>第一步，解析命令行参数。脚本要求至少传入一个期刊短码，并可选传入起始年份和结束年份。如果年份不合法，或者起始年份大于结束年份，程序会直接提示并退出。</p>
+<p>第二步，根据短码查找期刊全名。<code>nature_list.py</code> 中维护了期刊名称和 Nature URL，主程序会从 URL 末尾提取短码，并构造短码到期刊名称的映射。</p>
+<p>第三步，准备下载目录和 CSV 文件。下载根目录是 <code>downloads/</code>，每个期刊会创建独立子目录，CSV 文件保存在对应期刊目录下。</p>
+<p>第四步，读取已有 CSV，实现断点续爬。如果 CSV 中已经存在某篇文章的 URL，后续扫描 sitemap 时会跳过它，避免重复下载。</p>
+<p>第五步，从本地 <code>nature_sitemap.xml</code> 中筛选目标期刊的文章 sitemap。如果本地 sitemap 不存在，脚本会先请求 <code>https://www.nature.com/sitemap.xml</code> 并缓存到本地。</p>
+<p>第六步，边扫描 sitemap 边提交下载任务。每发现一个新的文章 URL，就提交到线程池中处理，同时主线程会定期回收已完成任务，把成功结果写入 CSV。</p>
+<h2 id="Sitemap-发现机制"><a href="#Sitemap-发现机制" class="headerlink" title="Sitemap 发现机制"></a>Sitemap 发现机制</h2><p>Nature 的文章 sitemap 地址具有固定模式：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">https://www.nature.com/&#123;journal&#125;/sitemap/&#123;year&#125;/&#123;month&#125;/articles.xml<br></code></pre></td></tr></table></figure>
 
-<blockquote>
-<p>使用 <code>ThreadPoolExecutor</code> 加速多文章抓取与下载，避免阻塞。</p>
-</blockquote>
-<hr>
-<h2 id="总结与注意事项"><a href="#总结与注意事项" class="headerlink" title="总结与注意事项"></a>总结与注意事项</h2><ol>
-<li>使用线程锁保护 CSV 写入，保证多线程安全。</li>
-<li>PDF 文件以 MD5 命名，防止重复下载。</li>
-<li>可根据需要调整 <code>max_workers</code> 控制并发量。</li>
-<li>解析 HTML 时，需要处理可能不存在的标签（如摘要或 PDF 链接）。</li>
-<li>建议加上异常处理和重试机制，保证稳定运行。</li>
+<p>脚本用正则从全站 sitemap 中筛选目标期刊的子 sitemap：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-string">rf&#x27;<span class="hljs-subst">&#123;BASE_URL&#125;</span>/<span class="hljs-subst">&#123;journal_code&#125;</span>/sitemap/(\\d&#123;&#123;4&#125;&#125;)/(\\d&#123;&#123;1,2&#125;&#125;)/articles\\.xml&#x27;</span><br></code></pre></td></tr></table></figure>
+
+<p>筛选结果会按年月倒序排列，因此默认会优先处理较新的文章。</p>
+<p>每个子 sitemap 中包含若干 <code>&lt;url&gt;</code> 节点，脚本只保留 URL 中包含 <code>/articles/</code> 的文章页面，排除其他非文章链接。</p>
+<h2 id="元数据提取"><a href="#元数据提取" class="headerlink" title="元数据提取"></a>元数据提取</h2><p>每篇文章由 <code>process_article()</code> 处理。它首先调用 <code>get_article_metadata()</code> 请求文章详情页，并从页面的 meta 标签中提取字段。</p>
+<p>提取内容包括：</p>
+<ul>
+<li>标题：<code>dc.title</code> 或 <code>citation_title</code></li>
+<li>DOI：<code>citation_doi</code> 或 <code>dc.identifier</code></li>
+<li>发布日期：<code>dc.date</code>、<code>citation_date</code> 或 <code>prism.publicationDate</code></li>
+<li>作者：所有 <code>dc.creator</code></li>
+<li>文章类别：<code>prism.section</code></li>
+<li>摘要：优先读取 <code>dc.description</code></li>
+<li>PDF 链接：寻找 <code>data-track-action=&quot;download pdf&quot;</code> 的链接</li>
+<li>开放访问状态：检测 <code>data-test=&quot;open-access&quot;</code> 元素</li>
+</ul>
+<p>如果页面没有提供摘要 meta 标签，脚本会尝试在正文中寻找标题为 Abstract 的区域，再拼接其后的内容作为摘要。</p>
+<h2 id="PDF-下载与去重"><a href="#PDF-下载与去重" class="headerlink" title="PDF 下载与去重"></a>PDF 下载与去重</h2><p>PDF 下载由 <code>download_pdf()</code> 完成。这个函数有几个实用设计：</p>
+<ol>
+<li>使用 <code>stream=True</code> 流式下载，避免一次性把大 PDF 读入内存。</li>
+<li>先读取文件前 4 个字节，检查是否以 <code>%PDF</code> 开头，避免把登录页、错误页或反爬页面保存成 PDF。</li>
+<li>下载过程中同步计算 MD5。</li>
+<li>先写入临时文件，下载完成后再改名为 <code>&#123;md5&#125;.pdf</code>。</li>
+<li>如果同一个 MD5 的文件已经存在，就删除临时文件并复用已有 PDF。</li>
 </ol>
-<hr>
-<h2 id="完整运行流程"><a href="#完整运行流程" class="headerlink" title="完整运行流程"></a>完整运行流程</h2><ol>
-<li>初始化 CSV 文件：<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python">init_csv([...])<br></code></pre></td></tr></table></figure></li>
-<li>抓取所有文章：<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python">getAllArticleDetails()<br></code></pre></td></tr></table></figure></li>
-<li>下载 PDF 并保存信息到 CSV。</li>
-</ol>
-<hr>
-<p>这套爬虫可以让你自动化管理期刊文章，非常适合科研、文献整理或数据分析使用。</p>
+<p>最终 PDF 的保存路径类似：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">downloads/Translational Psychiatry/2026/06/&#123;md5&#125;.pdf<br></code></pre></td></tr></table></figure>
+
+<p>CSV 中记录的是相对于期刊目录的 PDF 文件名，例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">2026/06/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.pdf<br></code></pre></td></tr></table></figure>
+
+<h2 id="CSV-输出"><a href="#CSV-输出" class="headerlink" title="CSV 输出"></a>CSV 输出</h2><p>CSV 字段定义在 <code>FIELDNAMES</code> 中：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">文章标题, URL, 文章类别, 发布时间, DOI, 作者, 摘要, MD5, PDF文件名<br></code></pre></td></tr></table></figure>
+
+<p>其中摘要字段会先进行 Base64 编码，再写入 CSV。这样做可以降低摘要中换行、逗号、特殊字符对 CSV 可读性和后续解析造成的影响。</p>
+<p>脚本每成功处理一篇文章就立即写入一行，并调用 <code>flush()</code> 刷新文件。这种方式适合长时间运行的爬虫，即使中途停止，也能尽量保留已经完成的结果。</p>
+<h2 id="并发模型"><a href="#并发模型" class="headerlink" title="并发模型"></a>并发模型</h2><p>项目使用 <code>ThreadPoolExecutor</code>，默认线程数为 5：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python">MAX_WORKERS = <span class="hljs-number">5</span><br></code></pre></td></tr></table></figure>
+
+<p>主线程负责扫描 sitemap 和提交任务，工作线程负责请求文章页、提取元数据、下载 PDF。程序不是先收集完所有 URL 再统一下载，而是“边发现边下载”。</p>
+<p>这个设计的好处是：</p>
+<ul>
+<li>不需要在内存中保存所有文章 URL。</li>
+<li>可以尽早开始下载，提高整体吞吐。</li>
+<li>日志能实时显示当前提交、下载中、已完成和失败数量。</li>
+</ul>
+<p>由于多个线程会共享计数器、CSV 文件和 URL 集合，项目使用了多个锁：</p>
+<ul>
+<li><code>csv_lock</code>：保护 CSV 写入。</li>
+<li><code>counter_lock</code>：保护下载成功和失败计数。</li>
+<li><code>submitted_urls_lock</code>：保护已提交 URL 集合。</li>
+</ul>
+<h2 id="断点续爬"><a href="#断点续爬" class="headerlink" title="断点续爬"></a>断点续爬</h2><p>断点续爬依赖 CSV 中的 <code>URL</code> 字段。程序启动时，如果发现目标期刊的 CSV 已存在，就读取其中所有 URL，加入 <code>existing_urls</code> 集合。</p>
+<p>后续扫描 sitemap 时，如果文章 URL 已在 <code>existing_urls</code> 中，就直接跳过。这能避免重复下载已完成文章，也适合按年份多次补跑。</p>
+<h2 id="反爬与访问限制处理"><a href="#反爬与访问限制处理" class="headerlink" title="反爬与访问限制处理"></a>反爬与访问限制处理</h2><p>脚本在请求文章页时设置了浏览器风格的 <code>User-Agent</code>、<code>Accept</code> 和 <code>Accept-Language</code>。同时还预留了 <code>COOKIES</code> 配置，用于带上会话信息。</p>
+<p>如果文章页返回内容过短并包含 <code>_fs-ch-</code>，脚本会认为触发了反爬验证，并抛出提示：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">触发反爬验证，请稍后重试或使用代理。<br></code></pre></td></tr></table></figure>
+
+<p>PDF 下载阶段，如果拿到的内容不是 <code>%PDF</code> 开头，程序会认为 PDF 无权限或响应内容不是 PDF，不会保存错误文件。</p>
+<h2 id="项目优点"><a href="#项目优点" class="headerlink" title="项目优点"></a>项目优点</h2><p>这个项目比较实用的地方在于：</p>
+<ul>
+<li>基于 sitemap 做文章发现，覆盖范围清晰。</li>
+<li>支持期刊短码和年份范围，控制粒度比较好。</li>
+<li>支持断点续爬，适合长时间批量任务。</li>
+<li>使用 MD5 命名 PDF，天然具备文件去重能力。</li>
+<li>PDF 有魔数校验，能减少错误文件污染。</li>
+<li>元数据和 PDF 分开保存，便于后续检索、清洗或入库。</li>
+<li>线程池并发下载，复杂度不高但效率明显优于单线程。</li>
+</ul>
+<h2 id="可以改进的地方"><a href="#可以改进的地方" class="headerlink" title="可以改进的地方"></a>可以改进的地方</h2><p>项目当前已经能完成核心任务，但还有一些可以继续优化的方向。</p>
+<p>第一，Cookie 不适合硬编码在源码中。更好的方式是从环境变量、配置文件或命令行参数中读取，避免泄露个人会话信息。</p>
+<p>第二，年份默认值写死为 <code>2000-2026</code>。如果长期使用，可以把结束年份默认设为当前年份，减少每年维护源码的成本。</p>
+<p>第三，CSV 中的摘要使用 Base64 虽然稳妥，但降低了人工阅读体验。后续可以同时保存原始摘要字段和编码字段，或者改用 JSONL、SQLite 等更适合结构化文本的格式。</p>
+<p>第四，失败记录目前主要输出在日志中。对于大规模任务，可以增加失败 CSV，把失败 URL、原因、年份、月份保存下来，方便单独重试。</p>
+<p>第五，下载权限和 OA 状态可以进一步细分。现在非 OA 但可下载的文章会标记为 <code>ACCESS</code>，如果需要做数据统计，可以额外保存访问状态字段。</p>
+<p>第六，当前线程数固定为 5。可以把它做成命令行参数，方便根据网络环境、目标站点压力和本机性能调整。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这个项目是一个结构清晰的 Nature 期刊 PDF 批量下载工具。它选择了 sitemap 作为入口，避开了列表页翻页的不稳定性；通过文章页 meta 标签提取元数据，保证信息来源明确；再结合流式下载、MD5 去重、CSV 断点续爬和线程池并发，使脚本具备了较好的可用性。</p>
+<p>从工程角度看，它不是一个复杂系统，但已经覆盖了爬虫任务中最关键的几个环节：URL 发现、页面解析、文件下载、去重、进度记录和失败处理。后续如果要继续扩展，可以围绕配置化、失败重试、数据存储格式和任务调度做增强。</p>
 
         </div>
         
@@ -345,14 +414,14 @@
         
         <nav class="post-nav">
           
-            <a class="prev" href="../../08/AmeSpider/">
+            <a class="prev" href="../oxford-oup-spider-bypass-summary/">
               <i class="fas fa-chevron-left"></i>
-              爬虫案例 AME 期刊网站：反爬策略、并发下载与工程化实现
+              Oxford Academic 爬虫与 Cloudflare Bypass 逻辑复盘
             </a>
           
           
-            <a class="next" href="../../../02/25/Mineflayer-Bot/">
-              使用 Node.js 和 Mineflayer 构建全自动 Minecraft 挖矿机器人
+            <a class="next" href="../../22/LCUAPI/">
+              LoLSearch —— 基于 LCU API 的隐藏战绩查询工具
               <i class="fas fa-chevron-right"></i>
             </a>
           
@@ -374,85 +443,7 @@
   <div class="vs-recommended-grid">
     
       <div class="vs-recommended-item" data-index="0" tabindex="0">
-        <a href="../../08/AmeSpider/" class="vs-recommended-link">
-          <!-- 文章信息 -->
-          <div class="vs-recommended-content">
-            <div class="vs-recommended-title">
-              <i class="fas fa-file-code"></i>
-              <span>爬虫案例 AME 期刊网站：反爬策略、并发下载与工程化实现</span>
-            </div>
-            
-            <div class="vs-recommended-excerpt">
-              AME 学术期刊爬虫：Python 多线程数据采集实战解析引言在学术研究中，批量下载期刊文章并提取元数据是一项常见需求。本文将深入解析一个专门针对 AME 出版社旗下期刊 Translational Gastroenterology and...
-            </div>
-            
-            <div class="vs-recommended-meta">
-              
-              
-              
-                <span class="vs-tags-preview">
-                  <i class="fas fa-tags"></i>
-                  python, 爬虫, 自动化
-                  
-                </span>
-              
-              
-              <span class="vs-meta-info">
-                <span class="vs-date">
-                  <i class="fas fa-calendar-alt"></i>
-                  Mar 08
-                </span>
-                <span class="vs-reading-time">
-                  <i class="fas fa-clock"></i>
-                  4 min
-                </span>
-              </span>
-            </div>
-          </div>
-        </a>
-      </div>
-    
-      <div class="vs-recommended-item" data-index="1" tabindex="0">
-        <a href="../../../06/30/nature-spider-summary/" class="vs-recommended-link">
-          <!-- 文章信息 -->
-          <div class="vs-recommended-content">
-            <div class="vs-recommended-title">
-              <i class="fas fa-file-code"></i>
-              <span>基于 Sitemap 的 Nature 期刊爬虫项目总结</span>
-            </div>
-            
-            <div class="vs-recommended-excerpt">
-              这个项目是一个面向 Nature 官网期刊页面的批量文章发现与 PDF 下载脚本。它不从列表页逐页翻页，而是基于 Nature 的 sitemap 结构定位期刊、年份和月份对应的文章 XML，再对文章页提取元数据和 PDF 下载链接，最后把...
-            </div>
-            
-            <div class="vs-recommended-meta">
-              
-              
-              
-                <span class="vs-tags-preview">
-                  <i class="fas fa-tags"></i>
-                  python, 爬虫, 自动化
-                  
-                </span>
-              
-              
-              <span class="vs-meta-info">
-                <span class="vs-date">
-                  <i class="fas fa-calendar-alt"></i>
-                  Jun 30
-                </span>
-                <span class="vs-reading-time">
-                  <i class="fas fa-clock"></i>
-                  2 min
-                </span>
-              </span>
-            </div>
-          </div>
-        </a>
-      </div>
-    
-      <div class="vs-recommended-item" data-index="2" tabindex="0">
-        <a href="../../../06/30/oxford-oup-spider-bypass-summary/" class="vs-recommended-link">
+        <a href="../oxford-oup-spider-bypass-summary/" class="vs-recommended-link">
           <!-- 文章信息 -->
           <div class="vs-recommended-content">
             <div class="vs-recommended-title">
@@ -490,17 +481,17 @@
         </a>
       </div>
     
-      <div class="vs-recommended-item" data-index="3" tabindex="0">
-        <a href="../../../06/06/CVE-2026-42945/" class="vs-recommended-link">
+      <div class="vs-recommended-item" data-index="1" tabindex="0">
+        <a href="../../../03/08/AmeSpider/" class="vs-recommended-link">
           <!-- 文章信息 -->
           <div class="vs-recommended-content">
             <div class="vs-recommended-title">
               <i class="fas fa-file-code"></i>
-              <span>CVE-2026-42945 本地复现</span>
+              <span>爬虫案例 AME 期刊网站：反爬策略、并发下载与工程化实现</span>
             </div>
             
             <div class="vs-recommended-excerpt">
-              CVE-2026-42945 本地复现1. 复现目标本报告用于在本地隔离环境中复现仓库 README 描述的 CVE-2026-42945 &amp;#x2F; NGINX Rift 行为。目标是把 env/Dockerfile、env/nginx...
+              AME 学术期刊爬虫：Python 多线程数据采集实战解析引言在学术研究中，批量下载期刊文章并提取元数据是一项常见需求。本文将深入解析一个专门针对 AME 出版社旗下期刊 Translational Gastroenterology and...
             </div>
             
             <div class="vs-recommended-meta">
@@ -509,7 +500,7 @@
               
                 <span class="vs-tags-preview">
                   <i class="fas fa-tags"></i>
-                  python
+                  python, 爬虫, 自动化
                   
                 </span>
               
@@ -517,11 +508,11 @@
               <span class="vs-meta-info">
                 <span class="vs-date">
                   <i class="fas fa-calendar-alt"></i>
-                  Jun 06
+                  Mar 08
                 </span>
                 <span class="vs-reading-time">
                   <i class="fas fa-clock"></i>
-                  6 min
+                  4 min
                 </span>
               </span>
             </div>
@@ -529,8 +520,47 @@
         </a>
       </div>
     
-      <div class="vs-recommended-item" data-index="4" tabindex="0">
-        <a href="../../../06/22/LCUAPI/" class="vs-recommended-link">
+      <div class="vs-recommended-item" data-index="2" tabindex="0">
+        <a href="../../../03/06/GutAndLiver/" class="vs-recommended-link">
+          <!-- 文章信息 -->
+          <div class="vs-recommended-content">
+            <div class="vs-recommended-title">
+              <i class="fas fa-file-code"></i>
+              <span>使用 Python 自动化下载 Gut and Liver 期刊 PDF</span>
+            </div>
+            
+            <div class="vs-recommended-excerpt">
+              使用 Python 自动化下载 Gut and Liver 期刊 PDF最近我写了一个 Python 爬虫，自动抓取并下载 Gut and Liver 期刊的文章 PDF，并将信息保存到 CSV 文件中。这里总结一下核心代码结构和分析。 核...
+            </div>
+            
+            <div class="vs-recommended-meta">
+              
+              
+              
+                <span class="vs-tags-preview">
+                  <i class="fas fa-tags"></i>
+                  python, 爬虫, 自动化
+                  
+                </span>
+              
+              
+              <span class="vs-meta-info">
+                <span class="vs-date">
+                  <i class="fas fa-calendar-alt"></i>
+                  Mar 06
+                </span>
+                <span class="vs-reading-time">
+                  <i class="fas fa-clock"></i>
+                  2 min
+                </span>
+              </span>
+            </div>
+          </div>
+        </a>
+      </div>
+    
+      <div class="vs-recommended-item" data-index="3" tabindex="0">
+        <a href="../../22/LCUAPI/" class="vs-recommended-link">
           <!-- 文章信息 -->
           <div class="vs-recommended-content">
             <div class="vs-recommended-title">
@@ -568,8 +598,47 @@
         </a>
       </div>
     
+      <div class="vs-recommended-item" data-index="4" tabindex="0">
+        <a href="../../06/CVE-2026-42945/" class="vs-recommended-link">
+          <!-- 文章信息 -->
+          <div class="vs-recommended-content">
+            <div class="vs-recommended-title">
+              <i class="fas fa-file-code"></i>
+              <span>CVE-2026-42945 本地复现</span>
+            </div>
+            
+            <div class="vs-recommended-excerpt">
+              CVE-2026-42945 本地复现1. 复现目标本报告用于在本地隔离环境中复现仓库 README 描述的 CVE-2026-42945 &amp;#x2F; NGINX Rift 行为。目标是把 env/Dockerfile、env/nginx...
+            </div>
+            
+            <div class="vs-recommended-meta">
+              
+              
+              
+                <span class="vs-tags-preview">
+                  <i class="fas fa-tags"></i>
+                  python
+                  
+                </span>
+              
+              
+              <span class="vs-meta-info">
+                <span class="vs-date">
+                  <i class="fas fa-calendar-alt"></i>
+                  Jun 06
+                </span>
+                <span class="vs-reading-time">
+                  <i class="fas fa-clock"></i>
+                  6 min
+                </span>
+              </span>
+            </div>
+          </div>
+        </a>
+      </div>
+    
       <div class="vs-recommended-item" data-index="5" tabindex="0">
-        <a href="../../../06/22/obs-vision-ndi-yolo/" class="vs-recommended-link">
+        <a href="../../22/obs-vision-ndi-yolo/" class="vs-recommended-link">
           <!-- 文章信息 -->
           <div class="vs-recommended-content">
             <div class="vs-recommended-title">
@@ -901,7 +970,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
 <script src="../../../../js/search.js"></script>
 <script src="../../../../js/theme-switch.js"></script>
 
-<script src="../../../../js/password-protect.js?v=1782774698374"></script>
+<script src="../../../../js/password-protect.js?v=1782774698372"></script>
 
         <script>
           // 移动端菜单切换

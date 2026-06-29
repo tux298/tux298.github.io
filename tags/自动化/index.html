@@ -40,7 +40,7 @@
   <link rel="stylesheet" href="../../css/mermaid.css">
 
   <link rel="stylesheet" href="../../css/vs-code.css">
-  <link rel="stylesheet" href="../../css/post.css?v=1782065500359">
+  <link rel="stylesheet" href="../../css/post.css?v=1782774698376">
   <link rel="stylesheet" href="../../css/tag.css">
   <link rel="stylesheet" href="../../css/categories.css">
   <link rel="stylesheet" href="../../css/archive.css">
@@ -195,19 +195,19 @@
           <div class="tag-item ">
             <i class="fas fa-tag"></i>
             <a href="../python/">python</a>
-            <span class="count">(4)</span>
+            <span class="count">(6)</span>
           </div>
         
           <div class="tag-item ">
             <i class="fas fa-tag"></i>
             <a href="../%E7%88%AC%E8%99%AB/">爬虫</a>
-            <span class="count">(2)</span>
+            <span class="count">(4)</span>
           </div>
         
           <div class="tag-item active">
             <i class="fas fa-tag"></i>
             <a href="">自动化</a>
-            <span class="count">(3)</span>
+            <span class="count">(5)</span>
           </div>
         
       </div>
@@ -229,10 +229,81 @@
           <i class="fas fa-tag"></i>
           Tag: 自动化
         </h1>
-        <span class="tag-count">3 posts</span>
+        <span class="tag-count">5 posts</span>
       </div>
 
       <div class="posts-container">
+        
+          <div class="post-card">
+            <div class="post-header">
+              <i class="fas fa-file-alt"></i>
+              <span class="post-title">
+                <a href="../../2026/06/30/oxford-oup-spider-bypass-summary/">Oxford Academic 爬虫与 Cloudflare Bypass 逻辑复盘</a>
+              </span>
+            </div>
+            
+            <div class="post-meta">
+              <span class="date">
+                <i class="fas fa-calendar-alt"></i>
+                2026-06-30
+              </span>
+              
+                <span class="category">
+                  <i class="fas fa-folder"></i>
+                  <a class="category-link" href="../../categories/python/">python</a>
+                </span>
+              
+            </div>
+            
+            <div class="post-excerpt">
+              本文整理一个面向 Oxford Academic 的期刊文章爬虫实现。代码主体在 Oxford.py，目标是抓取指定期刊在 2000-2026 年之间的 issue、article 元数据和 PDF，并将结果写入 CSV。由于站点存在 Cloudflare 挑战页，脚本还集成了基于 FlareSolverr 的 cookie 刷新与请求重试逻辑。
+说明：本文只分析工程实现。真实运行时应确保访问、下...
+            </div>
+            
+            <div class="post-footer">
+              <a href="../../2026/06/30/oxford-oup-spider-bypass-summary/" class="read-more">
+                <i class="fas fa-code"></i>
+                Read More
+              </a>
+            </div>
+          </div>
+        
+          <div class="post-card">
+            <div class="post-header">
+              <i class="fas fa-file-alt"></i>
+              <span class="post-title">
+                <a href="../../2026/06/30/nature-spider-summary/">基于 Sitemap 的 Nature 期刊爬虫项目总结</a>
+              </span>
+            </div>
+            
+            <div class="post-meta">
+              <span class="date">
+                <i class="fas fa-calendar-alt"></i>
+                2026-06-30
+              </span>
+              
+                <span class="category">
+                  <i class="fas fa-folder"></i>
+                  <a class="category-link" href="../../categories/python/">python</a>
+                </span>
+              
+            </div>
+            
+            <div class="post-excerpt">
+              这个项目是一个面向 Nature 官网期刊页面的批量文章发现与 PDF 下载脚本。它不从列表页逐页翻页，而是基于 Nature 的 sitemap 结构定位期刊、年份和月份对应的文章 XML，再对文章页提取元数据和 PDF 下载链接，最后把 PDF 与文章信息按期刊、年份、月份归档保存。
+项目目标项目的目标是自动化完成以下工作：
+
+根据期刊短码选择目标 Nature 期刊。
+从 Nature 全站...
+            </div>
+            
+            <div class="post-footer">
+              <a href="../../2026/06/30/nature-spider-summary/" class="read-more">
+                <i class="fas fa-code"></i>
+                Read More
+              </a>
+            </div>
+          </div>
         
           <div class="post-card">
             <div class="post-header">
@@ -361,7 +432,7 @@
     </div>
     <div class="status-item">
       <i class="fas fa-clock"></i>
-      2026-06-22
+      2026-06-30
     </div>
     <!-- <div class="status-item">
       <a href="https://github.com/tux298" target="_blank">tux298</a>
@@ -486,7 +557,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
 <script src="../../js/search.js"></script>
 <script src="../../js/theme-switch.js"></script>
 
-<script src="../../js/password-protect.js?v=1782065500359"></script>
+<script src="../../js/password-protect.js?v=1782774698376"></script>
 
         <script>
           // 移动端菜单切换
